@@ -1,0 +1,18 @@
+[theme]
+# Tema claro fixo: leitura melhor sob sol, no campo.
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f3f2ee"
+textColor = "#0b0b0b"
+
+[server]
+headless = true
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# esconde o menu de desenvolvedor (Deploy etc.) para o usuário final
+toolbarMode = "viewer"

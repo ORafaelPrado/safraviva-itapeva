@@ -1,0 +1,33 @@
+# Rotina diária na nuvem: atualiza previsão, clima, estimativas de safra e alertas no banco do MotherDuck,
+# todo dia às 6h de Brasília, sem depender do computador de casa ligado.
+# Segredos do repositório: MOTHERDUCK_TOKEN (obrigatório) e OPENAI_API_KEY (resumo semanal, opcional).
+name: rotina-diaria
+on:
+  schedule:
+    - cron: "0 9 * * *"   # 09:00 UTC = 06:00 em Brasília
+  workflow_dispatch:
+jobs:
+  rotina:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5-mini
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Atualizar dados e alertas
+        if: env.MOTHERDUCK_TOKEN != ''
+        run: python -m scripts.rotina_diaria
+      - name: Guardar o log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-rotina
+          path: data/logs/
+          if-no-files-found: ignore
