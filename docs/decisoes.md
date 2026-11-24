@@ -112,3 +112,10 @@ Assim, a rotina pode rodar várias vezes por dia sem encher a tela (nem o WhatsA
 - **Conversão:** Chicago vira R$/saca pela paridade (US¢/bushel × 60/kg por bushel × dólar), sem prêmio, frete nem impostos. A tela mostra o prêmio de porto (Paranaguá − Chicago).
 - **Preço de referência da fazenda:** passa a vir do CEPEA de forma automática, mas um preço digitado pelo produtor nunca é sobrescrito.
 - **IA:** a ferramenta `cotacoes` entrega a **decomposição Chicago × dólar** calculada por regra. Na primeira resposta real, o modelo leu "Chicago em reais" (que já inclui o câmbio) e atribuiu a alta à bolsa, quando em dólar a soja estava estável e a alta veio do dólar (+9,8%). Mesma lição do D020: interpretação pronta na ferramenta em vez de inferência do modelo.
+
+## D027 — Cara de produto: identidade, menu no topo e veredito do dia (24/11/2026)
+- Processo em 7 passos (documentos em [docs/design/](design/)). Passo 2 aplicado: tema próprio no `config.toml` (verde-safra `#1E6B3C`, fundo palha `#FAF8F3`, fonte Inter, cantos 12/10 px) com **contraste medido** (texto 15,5:1; verde 6,1:1), CSS concentrado em `app/estilo.css`, logo em SVG, ícones Material no lugar de emojis, menu no topo.
+- **Primeira dobra = veredito do dia** (`alertas.veredito_do_dia`, função pura e testada): uma frase por ordem de importância (alerta grave → chuva no dia → janela de pulverização → restrição), virando para "amanhã" às 18h, mais três números com fonte e hora.
+- **Teste A/B de texto** (A veredito · B pergunta · C conversa), sorteado por sessão ou forçado por `?v=`. Com um usuário só não há volume estatístico: serve para conversa; vale como métrica se houver mais produtores.
+- **Medição sem ferramenta externa:** `uso.evento` no próprio banco (página, versão, clique), sem dado pessoal; gravado no fim da execução para não atrasar a tela e sem nunca quebrar o painel. Desligado nos testes (`SAFRAVIVA_SEM_EVENTOS`).
+- Os gráficos mantêm a paleta validada para daltonismo: a cor da marca não entra em gráfico.

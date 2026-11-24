@@ -6,7 +6,7 @@ import streamlit as st
 from app import dados, notificacoes, ui
 from app.alertas import Alerta
 
-st.title("🔔 Alertas")
+st.title("Alertas")
 pid = ui.propriedade_atual()
 
 ativos = dados.alertas_ativos(pid)

@@ -9,7 +9,7 @@ from ai.ferramentas import Contexto
 from ai.registro import registrar
 from app import dados, ui
 
-st.title("🤖 Agrônomo Digital")
+st.title("Agrônomo Digital")
 st.caption("Pergunte sobre tempo, plantio, suas lavouras, custos e a região. As respostas usam os dados do SafraViva "
            "e citam a fonte. É orientação: decisões de defensivo exigem receituário agronômico.")
 

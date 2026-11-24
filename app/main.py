@@ -1,4 +1,4 @@
-"""SafraViva Itapeva — painel (Fase 3).
+"""SafraViva Itapeva — painel.
 
     streamlit run app/main.py
 
@@ -16,14 +16,15 @@ if str(RAIZ) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
-from app import dados, ui  # noqa: E402
+from app import dados, eventos, ui  # noqa: E402
 
-st.set_page_config(page_title="SafraViva Itapeva", page_icon="🌱", layout="centered")
+st.set_page_config(page_title="SafraViva Itapeva", page_icon=str(ui.ICONE), layout="centered")
 ui.configurar_pagina()
 
 # Painel online: pede a senha (segredo APP_SENHA no Streamlit Cloud). Em casa, sem a variável, não pede.
 if not ui.liberar_acesso():
     st.stop()
+st.logo(str(ui.LOGO), icon_image=str(ui.ICONE), size="large")
 
 PAGINAS = RAIZ / "app" / "paginas"
 
@@ -33,31 +34,36 @@ if _falha:
     st.toast(f"Não deu para atualizar a previsão agora: {_falha}", icon="⚠️")
 _alertas = dados.alertas_ativos(st.session_state.get("propriedade_id"))
 NOVOS = int(_alertas["novo"].sum()) if not _alertas.empty else 0
+# Menu no topo (no celular vira um botão sempre visível), por pergunta do produtor (plano mestre, seção 7).
 navegacao = st.navigation(
     {
+        "Hoje": [
+            st.Page(PAGINAS / "inicio.py", title="Hoje na lavoura", icon=":material/wb_sunny:", default=True),
+            st.Page(PAGINAS / "alertas.py", title=f"Alertas{f' ({NOVOS})' if NOVOS else ''}",
+                    icon=":material/notifications:"),
+        ],
         "Tempo e plantio": [
-            st.Page(PAGINAS / "inicio.py", title="Hoje na lavoura", icon="🏠", default=True),
-            st.Page(PAGINAS / "alertas.py", title=f"Alertas{f' ({NOVOS})' if NOVOS else ''}", icon="🔔"),
-            st.Page(PAGINAS / "clima.py", title="Previsão do tempo", icon="🌦️"),
-            st.Page(PAGINAS / "plantio.py", title="Janela de plantio", icon="🌱"),
+            st.Page(PAGINAS / "clima.py", title="Previsão do tempo", icon=":material/partly_cloudy_day:"),
+            st.Page(PAGINAS / "plantio.py", title="Janela de plantio", icon=":material/calendar_month:"),
         ],
         "Mercado": [
-            st.Page(PAGINAS / "cotacoes.py", title="Cotações", icon="📊"),
-        ],
-        "Assistente": [
-            st.Page(PAGINAS / "agronomo.py", title="Agrônomo Digital", icon="🤖"),
+            st.Page(PAGINAS / "cotacoes.py", title="Cotações", icon=":material/trending_up:"),
         ],
         "Minha fazenda": [
-            st.Page(PAGINAS / "estimativa.py", title="Estimativa de safra", icon="🌾"),
-            st.Page(PAGINAS / "fazenda.py", title="Resultados da safra", icon="💰"),
-            st.Page(PAGINAS / "lancar.py", title="Lançar", icon="✍️"),
-            st.Page(PAGINAS / "caderno.py", title="Caderno de campo", icon="📒"),
+            st.Page(PAGINAS / "estimativa.py", title="Estimativa de safra", icon=":material/grass:"),
+            st.Page(PAGINAS / "fazenda.py", title="Resultados da safra", icon=":material/payments:"),
+            st.Page(PAGINAS / "lancar.py", title="Lançar", icon=":material/edit_note:"),
+            st.Page(PAGINAS / "caderno.py", title="Caderno de campo", icon=":material/menu_book:"),
+        ],
+        "Agrônomo": [
+            st.Page(PAGINAS / "agronomo.py", title="Agrônomo Digital", icon=":material/forum:"),
         ],
         "Região": [
-            st.Page(PAGINAS / "producao.py", title="Produção regional", icon="📈"),
-            st.Page(PAGINAS / "safras.py", title="Clima e safras", icon="🔎"),
+            st.Page(PAGINAS / "producao.py", title="Produção regional", icon=":material/bar_chart:"),
+            st.Page(PAGINAS / "safras.py", title="Clima e safras", icon=":material/query_stats:"),
         ],
-    }
+    },
+    position="top",
 )
 
 with st.sidebar:
@@ -92,3 +98,7 @@ with st.sidebar:
     )
 
 navegacao.run()
+
+# Medição (uso.evento): grava depois que a tela já foi desenhada.
+eventos.registrar("pagina_vista", navegacao.url_path or "inicio")
+eventos.enviar()

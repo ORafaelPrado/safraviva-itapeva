@@ -8,7 +8,7 @@ import streamlit as st
 
 from app import dados, ui
 
-st.title("📊 Cotações")
+st.title("Cotações")
 st.caption("**CEPEA/ESALQ:** preço do físico no Brasil, uma vez por dia (sai à tarde). **Chicago (CBOT):** bolsa ao vivo, "
            "com ~15 min de atraso, convertida para R$/saca. A conversão não inclui o prêmio de porto, o frete nem os impostos. "
            "**Dólar:** comercial ao vivo e PTAX do Banco Central.")

@@ -243,3 +243,69 @@ def alerta_lavoura(talhao: str, cultura: str, fase: str | None, dias_apos_planti
     if fase == "pronta para colher":
         return Alerta("lavoura", "info", f"{nome}: pronta para colher", f"{contexto} Tempo firme nos próximos dias.")
     return Alerta("lavoura", "ok", f"{nome}: sem risco do tempo para a fase", contexto)
+
+
+# ----------------------------------------------------------------------------------------
+# Veredito do dia: a frase da primeira dobra da tela "Hoje na lavoura"
+# ----------------------------------------------------------------------------------------
+CHUVA_DIA_PARADO_MM = 10.0  # chuva no dia que, na prática, tira a operação da lavoura
+HORA_VIRADA = 18  # a partir das 18h o veredito passa a falar de amanhã
+
+
+@dataclass(frozen=True)
+class Veredito:
+    nivel: str  # critico | atencao | ok | info
+    resposta: str  # resposta curta à pergunta "dá para entrar na lavoura?"
+    frase: str  # o veredito em uma linha (título)
+    apoio: str  # o porquê, ou o alerta de atenção mais importante
+    quando: str  # "hoje" | "amanhã"
+
+    @property
+    def icone(self) -> str:
+        return NIVEIS[self.nivel][1]
+
+    @property
+    def rotulo(self) -> str:
+        return ROTULOS_VEREDITO[self.nivel]
+
+
+ROTULOS_VEREDITO = {"ok": "Tudo certo", "atencao": "Atenção", "critico": "Atenção alta", "info": "Com restrição"}
+
+
+def veredito_do_dia(diaria: pd.DataFrame, horaria: pd.DataFrame, agora: pd.Timestamp | None = None) -> Veredito:
+    """Uma frase com a decisão do dia, por ordem de importância:
+
+    1. alerta grave (geada forte, veranico severo) → "Cuidado";
+    2. chuva ≥ 10 mm no dia → "Não";
+    3. há horas boas para pulverizar → "Sim, das Xh às Yh";
+    4. senão → dá para trabalhar, mas não para pulverizar (com o melhor dia).
+    A partir das 18h, fala de amanhã.
+    """
+    agora = agora if agora is not None else pd.Timestamp.now()
+    alvo = agora.normalize() + pd.Timedelta(days=1 if agora.hour >= HORA_VIRADA else 0)
+    quando = "amanhã" if alvo > agora.normalize() else "hoje"
+
+    clima = [alerta_geada(diaria), alerta_veranico(diaria), alerta_calor(diaria), alerta_chuva_forte(diaria)]
+    grave = next((a for a in clima if a.nivel == "critico"), None)
+    atencao = next((a for a in clima if a.nivel == "atencao"), None)
+    if grave is not None:
+        return Veredito("critico", "Cuidado", grave.titulo, grave.detalhe, quando)
+
+    dia = diaria[pd.to_datetime(diaria["data"]).dt.normalize() == alvo]
+    chuva = float(dia["chuva_mm"].fillna(0).iloc[0]) if not dia.empty else 0.0
+    if chuva >= CHUVA_DIA_PARADO_MM:
+        return Veredito("atencao", "Não", f"Dia de chuva {quando}: {chuva:.0f} mm previstos",
+                        "Bom para planejar. Evite pulverizar e adubar a lanço.", quando)
+
+    extra = f" Atenção: {atencao.titulo.lower()}." if atencao is not None else ""
+    h = horas_pulverizacao(horaria, agora)
+    boas = h[(h["ts_local"].dt.normalize() == alvo) & h["boa"]]["ts_local"].dt.hour
+    if not boas.empty:
+        return Veredito("atencao" if atencao is not None else "ok", "Sim",
+                        f"Dá para pulverizar {quando}, das {boas.min()}h às {boas.max() + 1}h",
+                        ("Vento, Delta T e chuva na faixa certa." + extra).strip(), quando)
+
+    pulv = alerta_pulverizacao(horaria, agora)
+    porque = f"{pulv.titulo}." if pulv.nivel == "ok" else pulv.detalhe
+    return Veredito("atencao" if atencao is not None else "info", "Em parte",
+                    f"Dá para trabalhar {quando}, mas não para pulverizar", (porque + extra).strip(), quando)

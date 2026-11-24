@@ -126,3 +126,43 @@ def test_lavoura_geada_so_importa_no_trigo_sensivel():
 def test_lavoura_chuva_na_colheita():
     diaria = _diaria(chuva=[10.0] * 16)
     assert alertas.alerta_lavoura("T3", "soja", "maturação", 115, diaria).nivel == "atencao"
+
+
+# ---------------------------------------------------------------- veredito do dia (primeira dobra)
+def _diaria_nov(chuva_hoje=0.0, tmin_dia3=12.0):
+    d = _diaria(n=16)
+    d["data"] = pd.date_range("2026-11-04", periods=16, freq="D")
+    d.loc[0, "chuva_mm"] = chuva_hoje
+    d.loc[2, "temp_min_c"] = tmin_dia3
+    return d
+
+
+def test_veredito_sim_com_janela_de_pulverizacao():
+    v = alertas.veredito_do_dia(_diaria_nov(), _horaria(vento=6.0, delta_t=4.0), agora=pd.Timestamp("2026-11-04 06:10"))
+    assert (v.resposta, v.nivel, v.quando) == ("Sim", "ok", "hoje")
+    assert v.frase == "Dá para pulverizar hoje, das 6h às 21h"
+
+
+def test_veredito_chuva_forte_no_dia_tira_da_lavoura():
+    v = alertas.veredito_do_dia(_diaria_nov(chuva_hoje=22.0), _horaria(vento=6.0, delta_t=4.0),
+                                agora=pd.Timestamp("2026-11-04 07:00"))
+    assert v.resposta == "Não" and "22 mm" in v.frase
+
+
+def test_veredito_alerta_grave_vem_primeiro():
+    v = alertas.veredito_do_dia(_diaria_nov(tmin_dia3=0.5), _horaria(vento=6.0, delta_t=4.0),
+                                agora=pd.Timestamp("2026-11-04 07:00"))
+    assert v.resposta == "Cuidado" and v.nivel == "critico" and "geada" in v.frase.lower()
+
+
+def test_veredito_sem_janela_e_a_noite_fala_de_amanha():
+    sem = alertas.veredito_do_dia(_diaria_nov(), _horaria(vento=20.0, delta_t=4.0), agora=pd.Timestamp("2026-11-04 07:00"))
+    assert sem.resposta == "Em parte" and "não para pulverizar" in sem.frase
+    noite = alertas.veredito_do_dia(_diaria_nov(), _horaria(vento=6.0, delta_t=4.0), agora=pd.Timestamp("2026-11-04 19:00"))
+    assert noite.quando == "amanhã" and noite.frase.startswith("Dá para pulverizar amanhã")
+
+
+def test_veredito_atencao_aparece_no_apoio():
+    d = _diaria_nov(tmin_dia3=2.5)  # geada fraca: atenção, não grave
+    v = alertas.veredito_do_dia(d, _horaria(vento=6.0, delta_t=4.0), agora=pd.Timestamp("2026-11-04 07:00"))
+    assert v.resposta == "Sim" and v.nivel == "atencao" and "Atenção:" in v.apoio

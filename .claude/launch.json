@@ -4,8 +4,31 @@
     {
       "name": "safraviva",
       "runtimeExecutable": ".venv/Scripts/python.exe",
-      "runtimeArgs": ["-m", "streamlit", "run", "app/main.py", "--server.port", "8501"],
+      "runtimeArgs": [
+        "-m",
+        "streamlit",
+        "run",
+        "app/main.py",
+        "--server.port",
+        "8501"
+      ],
       "port": 8501
+    },
+    {
+      "name": "safraviva-senha",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "-m",
+        "streamlit",
+        "run",
+        "app/main.py",
+        "--server.port",
+        "8502"
+      ],
+      "port": 8502,
+      "env": {
+        "APP_SENHA": "so-para-ver-a-tela"
+      }
     }
   ]
 }

@@ -1,0 +1,73 @@
+/* SafraViva — estilo do painel. Tokens da identidade (docs/design/plano-mestre-safraviva.md, seção 6).
+   O tema base (cores, fonte Inter, cantos) está em .streamlit/config.toml; aqui só o que o tema não alcança. */
+:root {
+  --sv-fundo: #FAF8F3; --sv-superficie: #FFFFFF; --sv-borda: #E4E1D8;
+  --sv-texto: #1B2119; --sv-texto-2: #545A50; --sv-texto-3: #6B7066;
+  --sv-verde: #1E6B3C; --sv-trigo: #8A5F12;
+  --sv-ok: #1E6B3C; --sv-ok-fundo: #E8F1EA;
+  --sv-atencao: #C98A00; --sv-atencao-fundo: #FFF4DC;
+  --sv-critico: #B42318; --sv-critico-fundo: #FDECEA;
+  --sv-info: #2a78d6; --sv-info-fundo: #EAF1FB;
+}
+/* o menu no topo ocupa 60 px: o conteúdo começa abaixo dele */
+.block-container {padding-top: 4.75rem; padding-bottom: 3rem;}
+h1 {font-size: 1.9rem !important; letter-spacing: -0.01em;}
+@media (max-width: 640px) {
+  h1 {font-size: 1.55rem !important;}
+  h3 {font-size: 1.15rem !important;}
+  .block-container {padding-left: 1rem; padding-right: 1rem; padding-top: 4.5rem;}
+}
+/* alvos de toque >= 44 px */
+.stButton button, .stFormSubmitButton button, .stDownloadButton button,
+[data-testid="stPageLink"] a {min-height: 44px;}
+/* números alinhados em tabelas e métricas */
+[data-testid="stMetricValue"], .sv-num .sv-val {font-variant-numeric: tabular-nums;}
+
+/* cartões de alerta */
+.sv-card {border: 1px solid var(--sv-borda); border-left: 6px solid var(--sv-cor); border-radius: 12px;
+          padding: 12px 14px; margin-bottom: 10px; background: var(--sv-superficie);}
+.sv-card .sv-rotulo {font-size: 0.75rem; color: var(--sv-texto-2); text-transform: uppercase; letter-spacing: .04em;}
+.sv-card .sv-titulo {font-size: 1.02rem; font-weight: 650; color: var(--sv-texto); margin: 2px 0 4px;}
+.sv-card .sv-detalhe {font-size: 0.9rem; color: #3a3f37; line-height: 1.4;}
+.sv-fonte {font-size: 0.78rem; color: var(--sv-texto-3);}
+
+/* primeira dobra: veredito do dia */
+.sv-heroi {background: var(--sv-superficie); border: 1px solid var(--sv-borda); border-radius: 16px;
+           padding: 18px 18px 16px; margin: 0 0 12px;}
+.sv-sobre {font-size: 0.85rem; color: var(--sv-texto-3); margin-bottom: 10px;}
+.sv-selo {display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600;
+          color: var(--sv-texto); background: var(--sv-selo-fundo); border-radius: 999px; padding: 3px 10px 3px 8px;}
+.sv-selo::before {content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--sv-selo-cor);}
+.sv-heroi .sv-titulo-heroi {font-size: clamp(1.5rem, 5.6vw, 2.2rem); font-weight: 700; line-height: 1.15;
+                            letter-spacing: -0.015em; color: var(--sv-texto); margin: 10px 0 6px; padding: 0;}
+.sv-heroi .sv-resposta {font-size: 1.1rem; font-weight: 600; color: var(--sv-texto); margin: 0 0 4px;}
+.sv-heroi .sv-apoio {font-size: 1rem; color: var(--sv-texto-2); line-height: 1.45; margin: 0;}
+.sv-numeros {display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px;}
+.sv-num {border: 1px solid var(--sv-borda); border-radius: 12px; padding: 10px 12px; background: var(--sv-fundo); min-width: 0;}
+.sv-num .sv-rot {font-size: 0.75rem; color: var(--sv-texto-2); text-transform: uppercase; letter-spacing: .04em;}
+.sv-num .sv-val {font-size: 1.35rem; font-weight: 700; color: var(--sv-texto); line-height: 1.25; overflow-wrap: anywhere;}
+.sv-num .sv-det {font-size: 0.8rem; color: var(--sv-texto-3); overflow-wrap: anywhere;}
+.sv-num .sv-sobe {color: var(--sv-verde);}
+.sv-num .sv-desce {color: var(--sv-critico);}
+
+/* tela de entrada */
+.sv-entrada {margin: 4vh 0 8px;}
+.sv-entrada img {height: 44px; width: auto;}
+.sv-entrada h1 {font-size: clamp(1.6rem, 6vw, 2.3rem) !important; line-height: 1.15; margin: 18px 0 8px; padding: 0;}
+.sv-entrada p {color: var(--sv-texto-2); font-size: 1.05rem; margin: 0 0 14px;}
+.sv-fatos {display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none;}
+.sv-fatos li {font-size: 0.85rem; color: var(--sv-texto); background: var(--sv-superficie); border: 1px solid var(--sv-borda);
+              border-radius: 999px; padding: 5px 12px; margin: 0;}
+
+/* celular: depois das regras base, para valer sobre elas */
+@media (max-width: 640px) {
+  /* números do dia empilhados e compactos */
+  .sv-numeros {grid-template-columns: 1fr; gap: 8px; margin-top: 14px;}
+  .sv-num {padding: 8px 12px;}
+  .sv-num .sv-val {font-size: 1.2rem;}
+  .sv-heroi {padding: 16px 14px 14px;}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {animation: none !important; transition: none !important; scroll-behavior: auto !important;}
+}

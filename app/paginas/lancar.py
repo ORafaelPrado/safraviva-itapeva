@@ -9,7 +9,7 @@ import streamlit as st
 
 from app import dados, gestao, ui
 
-st.title("✍️ Lançar")
+st.title("Lançar")
 pid = ui.propriedade_atual()
 
 if pid is None:

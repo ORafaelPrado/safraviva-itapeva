@@ -8,7 +8,7 @@ import streamlit as st
 
 from app import alertas, dados, ui
 
-st.title("🌱 Janela de plantio")
+st.title("Janela de plantio")
 solo, ciclo = ui.referencia()
 st.caption(
     f"Zoneamento Agrícola de Risco Climático (MAPA) para Itapeva · solo **{solo}** · cultivar **{ciclo}** · sequeiro. "

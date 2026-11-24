@@ -7,6 +7,7 @@ com ícone + rótulo; divergente azul ↔ vermelho com meio cinza).
 from __future__ import annotations
 
 import html
+from pathlib import Path
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -14,30 +15,16 @@ import streamlit as st
 from app.alertas import Alerta
 
 SERIE = ["#2a78d6", "#eb6834", "#1baf7a"]
-TEXTO, TEXTO_2, GRADE, SUPERFICIE = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
+TEXTO, TEXTO_2, GRADE, SUPERFICIE = "#1B2119", "#545A50", "#E4E1D8", "#FAF8F3"  # tokens do tema
 NEUTRO = "#c9c8c2"
 STATUS = {"critico": "#d03b3b", "atencao": "#fab219", "ok": "#0ca30c", "info": "#2a78d6"}
 RISCO = {"baixo": "#0ca30c", "médio": "#fab219", "alto": "#ec835a"}
 
 CONFIG_PLOTLY = {"displayModeBar": False, "locale": "pt-BR"}
 
-CSS = """
-<style>
-.block-container {padding-top: 1.6rem; padding-bottom: 3rem;}
-h1 {font-size: 2rem !important;}
-@media (max-width: 640px) {
-  h1 {font-size: 1.6rem !important;}
-  h3 {font-size: 1.15rem !important;}
-  .block-container {padding-left: 1rem; padding-right: 1rem;}
-}
-.sv-card {border: 1px solid #e4e3df; border-left: 6px solid var(--sv-cor); border-radius: 10px;
-          padding: 12px 14px; margin-bottom: 10px; background: #ffffff;}
-.sv-card .sv-rotulo {font-size: 0.75rem; color: #52514e; text-transform: uppercase; letter-spacing: .04em;}
-.sv-card .sv-titulo {font-size: 1.02rem; font-weight: 650; color: #0b0b0b; margin: 2px 0 4px;}
-.sv-card .sv-detalhe {font-size: 0.9rem; color: #3a3936; line-height: 1.35;}
-.sv-fonte {font-size: 0.78rem; color: #6b6a65;}
-</style>
-"""
+CSS = Path(__file__).with_name("estilo.css").read_text(encoding="utf-8")
+LOGO = Path(__file__).with_name("static") / "logo.svg"
+ICONE = Path(__file__).with_name("static") / "icone.svg"
 
 
 def num(valor: float, casas: int = 0) -> str:
@@ -46,7 +33,7 @@ def num(valor: float, casas: int = 0) -> str:
 
 
 def configurar_pagina() -> None:
-    st.markdown(CSS, unsafe_allow_html=True)
+    st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
 
 
 def cartao(alerta: Alerta, tema: str | None = None) -> None:
@@ -73,7 +60,7 @@ def layout(fig: go.Figure, titulo: str | None = None, altura: int = 340, legenda
         margin=dict(l=12, r=12, t=56 if titulo else 16, b=12),
         paper_bgcolor=SUPERFICIE,
         plot_bgcolor=SUPERFICIE,
-        font=dict(family="Source Sans Pro, sans-serif", size=13, color=TEXTO_2),
+        font=dict(family="Inter, sans-serif", size=13, color=TEXTO_2),
         hoverlabel=dict(bgcolor="white", font_size=13, font_color=TEXTO),
         showlegend=legenda,
         legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0, font=dict(color=TEXTO)),
@@ -137,13 +124,73 @@ def liberar_acesso() -> bool:
     senha = os.getenv("APP_SENHA")
     if not senha or st.session_state.get("_acesso_liberado"):
         return True
-    st.title("🌱 SafraViva Itapeva")
-    st.caption("Painel da fazenda. Entre com a senha.")
+    tela_entrada()
     with st.form("entrar"):
         digitada = st.text_input("Senha", type="password")
-        if st.form_submit_button("Entrar", type="primary", width="stretch"):
+        if st.form_submit_button("Entrar", type="primary", width="stretch", icon=":material/login:"):
             if hmac.compare_digest(digitada.encode(), senha.encode()):
                 st.session_state["_acesso_liberado"] = True
                 st.rerun()
             st.error("Senha incorreta.")
     return False
+
+
+FATOS_PROJETO = (  # fatos verificáveis, documentados no README (nada inventado)
+    "52 anos de produção do IBGE",
+    "45 anos de clima diário",
+    "Estimativa de safra validada contra o IBGE",
+)
+
+
+def _html(trecho: str) -> None:
+    """HTML numa linha só: no Markdown do Streamlit, linha recuada depois de linha vazia vira bloco de código."""
+    st.markdown(" ".join(linha.strip() for linha in trecho.splitlines() if linha.strip()), unsafe_allow_html=True)
+
+
+def _svg_base64(caminho: Path) -> str:
+    import base64
+
+    return "data:image/svg+xml;base64," + base64.b64encode(caminho.read_bytes()).decode()
+
+
+def tela_entrada() -> None:
+    """Primeira tela do painel online: marca, promessa e fatos do projeto, antes da senha."""
+    fatos = "".join(f"<li>{html.escape(f)}</li>" for f in FATOS_PROJETO)
+    _html(
+        f"""<div class="sv-entrada">
+              <img src="{_svg_base64(LOGO)}" alt="SafraViva">
+              <h1>Abra e saiba se hoje é dia de entrar na lavoura.</h1>
+              <p>Tempo, lavoura, mercado e contas da fazenda em um só lugar, com dados de Itapeva-SP.</p>
+              <ul class="sv-fatos">{fatos}</ul>
+            </div>"""
+    )
+
+
+CORES_SELO = {  # (cor do ponto, fundo do selo): a palavra fica sempre em texto escuro (contraste >= 4,5:1)
+    "ok": ("var(--sv-ok)", "var(--sv-ok-fundo)"),
+    "atencao": ("var(--sv-atencao)", "var(--sv-atencao-fundo)"),
+    "critico": ("var(--sv-critico)", "var(--sv-critico-fundo)"),
+    "info": ("var(--sv-info)", "var(--sv-info-fundo)"),
+}
+
+
+def heroi(sobre: str, nivel: str, rotulo: str, titulo: str, apoio: str,
+          numeros: list[tuple[str, str, str]], resposta: str | None = None) -> None:
+    """Primeira dobra: selo de situação, veredito, apoio e três números (rótulo, valor, detalhe em HTML seguro)."""
+    cor, fundo = CORES_SELO[nivel]
+    blocos = "".join(
+        f'<div class="sv-num"><div class="sv-rot">{html.escape(r)}</div>'
+        f'<div class="sv-val">{html.escape(v)}</div><div class="sv-det">{d}</div></div>'
+        for r, v, d in numeros
+    )
+    linha_resposta = f'<p class="sv-resposta">{html.escape(resposta)}</p>' if resposta else ""
+    _html(
+        f"""<section class="sv-heroi" aria-label="Resumo do dia">
+              <div class="sv-sobre">{html.escape(sobre)}</div>
+              <span class="sv-selo" style="--sv-selo-cor:{cor};--sv-selo-fundo:{fundo}">{html.escape(rotulo)}</span>
+              <h2 class="sv-titulo-heroi">{html.escape(titulo)}</h2>
+              {linha_resposta}
+              <p class="sv-apoio">{html.escape(apoio)}</p>
+              <div class="sv-numeros">{blocos}</div>
+            </section>"""
+    )

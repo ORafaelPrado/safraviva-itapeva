@@ -5,7 +5,7 @@ import streamlit as st
 
 from app import dados, ui
 
-st.title("📈 Produção regional")
+st.title("Produção regional")
 cultura = st.segmented_control("Cultura", ["soja", "milho", "trigo"], default="soja",
                                format_func=str.capitalize) or "soja"
 

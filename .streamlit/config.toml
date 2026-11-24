@@ -1,14 +1,29 @@
 [theme]
-# Tema claro fixo: leitura melhor sob sol, no campo.
+# Identidade SafraViva (docs/design/plano-mestre-safraviva.md, seção 6). Tema claro fixo: leitura sob sol.
+# Contraste medido (WCAG): texto 15,5:1 · verde-safra 6,1:1 · branco sobre o verde 6,5:1.
 base = "light"
-primaryColor = "#2a78d6"
-backgroundColor = "#fcfcfb"
-secondaryBackgroundColor = "#f3f2ee"
-textColor = "#0b0b0b"
+primaryColor = "#1E6B3C"
+backgroundColor = "#FAF8F3"
+secondaryBackgroundColor = "#F1EEE6"
+textColor = "#1B2119"
+linkColor = "#1E6B3C"
+borderColor = "#E4E1D8"
+showWidgetBorder = true
+baseRadius = "12px"
+buttonRadius = "10px"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap, sans-serif"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap, sans-serif"
+metricValueFontSize = "1.75rem"
+greenColor = "#1E6B3C"
+redColor = "#B42318"
+
+[theme.sidebar]
+backgroundColor = "#F1EEE6"
 
 [server]
 headless = true
 runOnSave = false
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false

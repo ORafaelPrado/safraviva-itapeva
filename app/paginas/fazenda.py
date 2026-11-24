@@ -5,7 +5,7 @@ import streamlit as st
 
 from app import dados, gestao, ui
 
-st.title("💰 Resultados da safra")
+st.title("Resultados da safra")
 pid = ui.propriedade_atual()
 
 if pid is None:

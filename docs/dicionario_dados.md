@@ -82,3 +82,8 @@ A estimativa de safra é calculada sob demanda (`analytics/balanco_hidrico.py`) 
 | `raw.cotacao_diaria` | série × dia | `serie` (cepea_soja_parana, cepea_soja_paranagua, cepea_milho, cepea_trigo_parana, cbot_soja/milho/trigo, dolar, dolar_ptax), `valor` na unidade original, `valor_rs_sc` normalizado para R$/saca 60 kg |
 | `raw.cotacao_intradia` | série × 15 min (bolsa) / 5 min (dólar) | último pregão |
 | `raw.cotacao_ultima` | série de bolsa | preço, variação do dia, horário do mercado, `preco_rs_sc` |
+
+## Uso do painel (`uso`)
+| Tabela | Grão | Colunas |
+|---|---|---|
+| `uso.evento` | um evento | `ts`, `sessao` (id aleatório por sessão), `evento` (`pagina_vista` · `ab_view` · `cta_click`), `pagina`, `detalhe` (ex.: `agronomo\|v=B`), `dispositivo` (`celular` · `computador`). Sem dado pessoal. |

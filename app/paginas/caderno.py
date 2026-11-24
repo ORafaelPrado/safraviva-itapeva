@@ -4,7 +4,7 @@ import streamlit as st
 
 from app import dados, gestao, ui
 
-st.title("📒 Caderno de campo")
+st.title("Caderno de campo")
 pid = ui.propriedade_atual()
 if pid is None:
     st.info("Ainda não há propriedade cadastrada.")

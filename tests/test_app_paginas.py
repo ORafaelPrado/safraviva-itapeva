@@ -86,3 +86,28 @@ def test_senha_protege_o_painel_online(monkeypatch):
     at.text_input[0].set_value("milho2026")
     at.button[0].click().run()
     assert at.session_state["_acesso_liberado"] is True
+
+
+def test_inicio_mostra_veredito_e_versao_do_link(banco_temporario):
+    """Primeira dobra: a versão do texto pode ser forçada pelo link (?v=B) e vira evento ab_view na fila."""
+    _, pid, _ = banco_temporario
+    at = _app("inicio.py", pid)
+    at.query_params["v"] = "b"
+    at.run()
+    assert not at.exception
+    assert at.session_state["_versao_heroi"] == "B"
+    fila = at.session_state["_eventos_pendentes"] if "_eventos_pendentes" in at.session_state else []
+    # sem previsão no banco temporário não há veredito, então não há ab_view; com previsão, há exatamente um
+    assert all(e[2] == "ab_view" and e[4] == "v=B" for e in fila)
+
+
+def test_eventos_gravam_no_banco(banco_temporario):
+    from datetime import datetime
+
+    from app import eventos
+
+    caminho, _, _ = banco_temporario
+    with duckdb.connect(str(caminho)) as con:
+        n = eventos.gravar(con, [(datetime(2026, 11, 24, 7), "abc", "cta_click", "inicio", "agronomo|v=A", "celular")])
+        assert n == 1
+        assert con.execute("SELECT evento, detalhe FROM uso.evento").fetchall() == [("cta_click", "agronomo|v=A")]

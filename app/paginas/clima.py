@@ -6,7 +6,7 @@ import streamlit as st
 
 from app import alertas, dados, ui
 
-st.title("🌦️ Previsão do tempo")
+st.title("Previsão do tempo")
 diaria, horaria = dados.previsao_diaria(), dados.previsao_horaria()
 if diaria.empty:
     st.warning("Sem previsão no banco. Atualize na tela inicial.")

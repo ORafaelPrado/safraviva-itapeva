@@ -8,7 +8,7 @@ import streamlit as st
 from analytics.balanco_hidrico import CONFIABILIDADE, TAW_POR_AD
 from app import dados, ui
 
-st.title("🌾 Estimativa de safra")
+st.title("Estimativa de safra")
 pid = ui.propriedade_atual()
 if pid is None:
     st.info("Cadastre a propriedade e os plantios para ver a estimativa.")

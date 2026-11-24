@@ -12,3 +12,4 @@ import pytest
 def _sem_banco_na_nuvem(monkeypatch):
     monkeypatch.delenv("MOTHERDUCK_TOKEN", raising=False)
     monkeypatch.setenv("SAFRAVIVA_SEM_ATUALIZAR", "1")  # telas não buscam dados na internet durante os testes
+    monkeypatch.setenv("SAFRAVIVA_SEM_EVENTOS", "1")  # nem gravam medição de uso no banco
