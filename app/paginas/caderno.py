@@ -34,7 +34,7 @@ filtro["categoria"] = filtro["categoria_custo"].map(lambda k: gestao.CATEGORIAS.
 st.metric("Gasto no período filtrado", ui.reais(filtro["custo_total"].fillna(0).sum()))
 st.dataframe(
     filtro[["data", "talhao", "o_que", "produto", "dose", "unidade", "custo_total", "categoria", "observacao"]],
-    hide_index=True, use_container_width=True, height=480,
+    hide_index=True, width="stretch", height=480,
     column_config={
         "data": st.column_config.DateColumn("Data", format="DD/MM/YY"),
         "talhao": "Talhão", "o_que": "O quê", "produto": "Produto / descrição",

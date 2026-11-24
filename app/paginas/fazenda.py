@@ -80,7 +80,7 @@ tabela = rs.assign(
     custo_ha_prev=rs["custo_previsto"] / rs["area_ha"],
 )[["rotulo", "status", "area_ha", "custo_ha_prev", "produtividade_sc_ha", "ponto_equilibrio_sc_ha", "preco_sc", "margem_ha"]]
 st.dataframe(
-    tabela, hide_index=True, use_container_width=True,
+    tabela, hide_index=True, width="stretch",
     column_config={
         "rotulo": "Lavoura", "status": "Situação",
         "area_ha": st.column_config.NumberColumn("Área (ha)", format="%.0f"),
@@ -140,7 +140,7 @@ if not v.empty:
         colhidas = rs.loc[rs["cultura"] == cultura, "sacas"].sum()
         st.markdown(f"**{gestao.CULTURAS[cultura]}:** {ui.num(g['sacas'].sum())} sc vendidas de {ui.num(colhidas)} colhidas, "
                     f"preço médio {ui.reais(preco_medio, 2)}/sc.")
-    st.dataframe(v[["data", "cultura", "sacas", "preco_sc", "comprador"]], hide_index=True, use_container_width=True,
+    st.dataframe(v[["data", "cultura", "sacas", "preco_sc", "comprador"]], hide_index=True, width="stretch",
                  column_config={"data": st.column_config.DateColumn("Data", format="DD/MM/YYYY"),
                                 "cultura": "Cultura", "sacas": st.column_config.NumberColumn("Sacas", format="%.0f"),
                                 "preco_sc": st.column_config.NumberColumn("R$/sc", format="%.2f"), "comprador": "Comprador"})

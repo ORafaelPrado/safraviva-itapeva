@@ -106,7 +106,7 @@ def rotulos_finais(fig: go.Figure, itens: list[tuple[float, float, str, str]], y
 
 
 def mostrar(fig: go.Figure) -> None:
-    st.plotly_chart(fig, use_container_width=True, config=CONFIG_PLOTLY, theme=None)
+    st.plotly_chart(fig, width="stretch", config=CONFIG_PLOTLY, theme=None)
 
 
 def referencia() -> tuple[str, str]:
@@ -141,7 +141,7 @@ def liberar_acesso() -> bool:
     st.caption("Painel da fazenda. Entre com a senha.")
     with st.form("entrar"):
         digitada = st.text_input("Senha", type="password")
-        if st.form_submit_button("Entrar", type="primary", use_container_width=True):
+        if st.form_submit_button("Entrar", type="primary", width="stretch"):
             if hmac.compare_digest(digitada.encode(), senha.encode()):
                 st.session_state["_acesso_liberado"] = True
                 st.rerun()

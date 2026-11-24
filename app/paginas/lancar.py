@@ -66,7 +66,7 @@ with aba_op:
             categoria = st.selectbox("Categoria do custo", list(gestao.CATEGORIAS), format_func=gestao.CATEGORIAS.get,
                                      index=list(gestao.CATEGORIAS).index(CATEGORIA_PADRAO[tipo]))
             obs = st.text_input("Observação")
-            if st.form_submit_button("Salvar operação", type="primary", use_container_width=True):
+            if st.form_submit_button("Salvar operação", type="primary", width="stretch"):
                 ok, msg = dados.gravar(gestao.registrar_operacao, plantio_id, quando, tipo, produto=produto or None,
                                        dose=dose, unidade=unidade if dose else None, custo_total=custo,
                                        categoria_custo=categoria if custo else None, observacao=obs or None)
@@ -81,7 +81,7 @@ with aba_desp:
         destino = st.selectbox("De qual lavoura?", [None] + list(opcoes_todos),
                                format_func=lambda k: "Propriedade toda (dividir pela área da safra)" if k is None else opcoes_todos[k])
         descricao = st.text_input("Descrição", placeholder="ex.: seguro agrícola, honorário do agrônomo")
-        if st.form_submit_button("Salvar despesa", type="primary", use_container_width=True):
+        if st.form_submit_button("Salvar despesa", type="primary", width="stretch"):
             if not valor:
                 st.error("Informe o valor.")
             else:
@@ -106,7 +106,7 @@ with aba_col:
             umidade = c1.number_input("Umidade (%)", min_value=0.0, max_value=40.0, value=None)
             impureza = c2.number_input("Impureza (%)", min_value=0.0, max_value=20.0, value=None)
             terminou = st.checkbox("Terminou de colher esta lavoura", value=True)
-            if st.form_submit_button("Salvar colheita", type="primary", use_container_width=True):
+            if st.form_submit_button("Salvar colheita", type="primary", width="stretch"):
                 if not sacas:
                     st.error("Informe as sacas colhidas.")
                 else:
@@ -126,7 +126,7 @@ with aba_venda:
         sacas = c3.number_input("Sacas", min_value=0.0, step=10.0, value=None)
         preco = c4.number_input("Preço (R$/saca)", min_value=0.0, step=0.5, value=None)
         comprador = st.text_input("Comprador")
-        if st.form_submit_button("Salvar venda", type="primary", use_container_width=True):
+        if st.form_submit_button("Salvar venda", type="primary", width="stretch"):
             if not sacas or not preco:
                 st.error("Informe sacas e preço.")
             else:
@@ -145,7 +145,7 @@ with aba_oc:
             severidade = st.radio("Gravidade", [1, 2, 3], horizontal=True,
                                   format_func={1: "Leve", 2: "Moderada", 3: "Severa"}.get)
             descricao = st.text_area("Descrição", placeholder="ex.: lagarta na bordadura, 2 por metro")
-            if st.form_submit_button("Salvar ocorrência", type="primary", use_container_width=True):
+            if st.form_submit_button("Salvar ocorrência", type="primary", width="stretch"):
                 ok, msg = dados.gravar(gestao.registrar_ocorrencia, plantio_id, quando, tipo, severidade, descricao or None)
                 sucesso(ok, msg, "Ocorrência salva.")
 
@@ -158,7 +158,7 @@ with aba_cad:
         area = c1.number_input("Área (ha)", min_value=0.0, step=1.0, value=None)
         solo = c2.selectbox("Solo (água disponível)", gestao.SOLOS, index=3,
                             help="AD1 = arenoso, seca rápido · AD6 = argiloso profundo. Na dúvida, use a análise de textura.")
-        if st.form_submit_button("Salvar talhão", use_container_width=True):
+        if st.form_submit_button("Salvar talhão", width="stretch"):
             if not nome.strip() or not area:
                 st.error("Informe nome e área.")
             else:
@@ -180,7 +180,7 @@ with aba_cad:
             cultivar = c3.text_input("Cultivar")
             grupo = c4.selectbox("Ciclo", ["Grupo I", "Grupo II", "Grupo III"], index=1)
             meta = st.number_input("Meta de produtividade (sc/ha)", min_value=0.0, step=1.0, value=None)
-            if st.form_submit_button("Salvar plantio", use_container_width=True):
+            if st.form_submit_button("Salvar plantio", width="stretch"):
                 ok, msg = dados.gravar(gestao.criar_plantio, talhao_id, cultura, temporada, data_plantio,
                                        cultivar=cultivar or None, grupo_ciclo=grupo, produtividade_meta_sc_ha=meta)
                 sucesso(ok, msg, f"Plantio de {gestao.CULTURAS[cultura]} salvo (safra {gestao.safra_de(data_plantio)}).")
@@ -189,7 +189,7 @@ with aba_cad:
 with aba_preco:
     st.caption("Usados para estimar a receita das sacas ainda não vendidas. Atualize quando quiser.")
     precos = dados.precos_referencia()
-    st.dataframe(precos, hide_index=True, use_container_width=True,
+    st.dataframe(precos, hide_index=True, width="stretch",
                  column_config={"cultura": "Cultura", "preco_sc": st.column_config.NumberColumn("R$/saca", format="%.2f"),
                                 "data": st.column_config.DateColumn("Data", format="DD/MM/YYYY"), "fonte": "Fonte"})
     with st.form("preco"):
@@ -197,6 +197,6 @@ with aba_preco:
         cultura = c1.selectbox("Cultura", list(gestao.CULTURAS), format_func=gestao.CULTURAS.get, key="preco_cultura")
         preco = c2.number_input("R$/saca", min_value=0.0, step=0.5, value=None)
         fonte = st.text_input("Fonte", value="Cotação local")
-        if st.form_submit_button("Atualizar preço", use_container_width=True) and preco:
+        if st.form_submit_button("Atualizar preço", width="stretch") and preco:
             ok, msg = dados.gravar(gestao.atualizar_preco, cultura, preco, date.today(), fonte)
             sucesso(ok, msg, "Preço atualizado.")

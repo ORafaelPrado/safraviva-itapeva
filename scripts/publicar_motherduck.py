@@ -43,12 +43,64 @@ def main() -> None:
     if banco in existentes and not args.substituir:
         sys.exit(f"O banco '{banco}' já existe no MotherDuck e pode ter lançamentos feitos online. "
                  "Use --baixar para fazer backup ou --substituir se tiver certeza.")
-    local = config.CAMINHO_DB.as_posix()
     if banco in existentes:
         nuvem.execute(f"DROP DATABASE {banco}")
-    nuvem.execute(f"CREATE DATABASE {banco} FROM '{local}'")
-    tabelas = nuvem.execute(f"SELECT count(*) FROM {banco}.information_schema.tables").fetchone()[0]
-    print(f"Banco local publicado em md:{banco} ({tabelas} tabelas e views).")
+    publicar(nuvem, banco, config.CAMINHO_DB.as_posix())
+
+
+# Tabelas com chave estrangeira, na ordem pai → filho (o resto não tem dependência).
+ORDEM_FK = ["fazenda.propriedade", "fazenda.talhao", "fazenda.plantio", "fazenda.operacao", "fazenda.custo",
+            "fazenda.colheita", "fazenda.venda", "fazenda.ocorrencia"]
+# Sequências e as tabelas cujo maior id elas precisam ultrapassar.
+SEQUENCIAS = {"fazenda.seq_id": ORDEM_FK, "ai.seq_conversa": ["ai.conversa"], "notif.seq_alerta": ["notif.alerta"]}
+
+
+def publicar(nuvem: duckdb.DuckDBPyConnection, banco: str, arquivo_local: str) -> None:
+    """Cria o banco na nuvem com o mesmo DDL do projeto e copia os dados respeitando as chaves.
+
+    (O `CREATE DATABASE ... FROM` do MotherDuck copia as tabelas fora de ordem e viola as FKs.)
+    """
+    from scripts import rodar_etl
+
+    nuvem.execute(f"CREATE DATABASE {banco}")
+    nuvem.execute(f"ATTACH '{arquivo_local}' AS loc (READ_ONLY)")
+    nuvem.execute(f"USE {banco}")
+
+    # 1) esquemas e sequências começando depois do maior id local (para não colidir com ids copiados)
+    for esquema in ("raw", "staging", "analytics", "fazenda", "ai", "notif"):
+        nuvem.execute(f"CREATE SCHEMA IF NOT EXISTS {esquema}")
+    for seq, tabelas in SEQUENCIAS.items():
+        maior = max((nuvem.execute(f"SELECT coalesce(max(id), 0) FROM loc.{t}").fetchone()[0] for t in tabelas), default=0)
+        nuvem.execute(f"CREATE SEQUENCE IF NOT EXISTS {seq} START {maior + 1}")
+
+    # 2) estrutura: o mesmo DDL do projeto (tabelas, chaves, views)
+    for arquivo in sorted((config.DIR_SQL / "ddl").glob("*.sql")):
+        nuvem.execute(arquivo.read_text(encoding="utf-8"))
+
+    # 3) dados: tabelas com FK na ordem pai → filho; as demais em qualquer ordem
+    locais = [f"{s}.{t}" for s, t in nuvem.execute(
+        "SELECT table_schema, table_name FROM information_schema.tables "
+        "WHERE table_catalog = 'loc' AND table_type = 'BASE TABLE'").fetchall()]
+    na_nuvem = {f"{s}.{t}" for s, t in nuvem.execute(
+        f"SELECT table_schema, table_name FROM information_schema.tables "
+        f"WHERE table_catalog = '{banco}' AND table_type = 'BASE TABLE'").fetchall()}
+    ordem = [t for t in ORDEM_FK if t in locais] + sorted(t for t in locais if t not in ORDEM_FK)
+    for tabela in reversed(ordem):  # limpa o que o DDL já populou (filhos antes dos pais)
+        if tabela in na_nuvem:
+            nuvem.execute(f"DELETE FROM {tabela}")
+    for tabela in ordem:
+        if tabela in na_nuvem:
+            nuvem.execute(f"INSERT INTO {tabela} BY NAME SELECT * FROM loc.{tabela}")
+        else:
+            nuvem.execute(f"CREATE TABLE {tabela} AS SELECT * FROM loc.{tabela}")
+        n = nuvem.execute(f"SELECT count(*) FROM {tabela}").fetchone()[0]
+        print(f"  {tabela:<40} {n:>9} linhas")
+    nuvem.execute("DETACH loc")
+
+    # 4) camada analytics e views recalculadas na nuvem
+    rodar_etl.transformar(nuvem)
+    total = nuvem.execute(f"SELECT count(*) FROM information_schema.tables WHERE table_catalog = '{banco}'").fetchone()[0]
+    print(f"Banco local publicado em md:{banco} ({total} tabelas e views).")
 
 
 if __name__ == "__main__":

@@ -92,7 +92,7 @@ st.caption(f"Solo {solo}: cerca de {ui.num(TAW_POR_AD.get(solo, 100))} mm de ág
 # --- Por fase -----------------------------------------------------------------------------------------------
 fases = e.simulacao_mediana.por_fase.assign(atendido=lambda d: 100 * d["razao_eta_etc"])
 st.dataframe(
-    fases[["fase", "etc_mm", "eta_mm", "atendido", "ky", "perda_pct"]], hide_index=True, use_container_width=True,
+    fases[["fase", "etc_mm", "eta_mm", "atendido", "ky", "perda_pct"]], hide_index=True, width="stretch",
     column_config={
         "fase": "Fase", "etc_mm": st.column_config.NumberColumn("Precisava (mm)", format="%.0f"),
         "eta_mm": st.column_config.NumberColumn("Teve (mm)", format="%.0f"),

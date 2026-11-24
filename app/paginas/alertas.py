@@ -19,7 +19,7 @@ else:
     novos = ativos[ativos["novo"]]
     c1, c2 = st.columns([3, 2])
     c1.markdown(f"**{len(ativos)} ativo(s)**, {len(novos)} novo(s)")
-    if len(novos) and c2.button("Marcar todos como lidos", use_container_width=True):
+    if len(novos) and c2.button("Marcar todos como lidos", width="stretch"):
         ok, msg = dados.gravar(notificacoes.marcar_lidos, novos["id"].tolist())
         st.rerun() if ok else st.error(msg)
     for r in ativos.itertuples():

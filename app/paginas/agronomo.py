@@ -81,13 +81,13 @@ for i, pendente in enumerate(list(st.session_state["pendentes"])):
     with st.container(border=True):
         st.markdown(f"**Lançamento para confirmar:** {pendente['resumo']}")
         c1, c2 = st.columns(2)
-        if c1.button("✅ Confirmar", key=f"ok_{i}", type="primary", use_container_width=True):
+        if c1.button("✅ Confirmar", key=f"ok_{i}", type="primary", width="stretch"):
             ok, msg = dados.gravar(confirmar_pendente, pendente)
             st.session_state["pendentes"].pop(i)
             st.session_state["chat"].append({"role": "assistant",
                                              "content": "✅ Lançado no caderno de campo." if ok else f"❌ {msg}"})
             st.rerun()
-        if c2.button("Cancelar", key=f"nao_{i}", use_container_width=True):
+        if c2.button("Cancelar", key=f"nao_{i}", width="stretch"):
             st.session_state["pendentes"].pop(i)
             st.session_state["chat"].append({"role": "assistant", "content": "Lançamento cancelado."})
             st.rerun()
@@ -98,7 +98,7 @@ if not st.session_state["chat"] and not pergunta:
     st.markdown("**Experimente:**")
     cols = st.columns(2)
     for i, s in enumerate(SUGESTOES):
-        if cols[i % 2].button(s, key=f"sug_{i}", use_container_width=True):
+        if cols[i % 2].button(s, key=f"sug_{i}", width="stretch"):
             pergunta = s
 
 if pergunta:

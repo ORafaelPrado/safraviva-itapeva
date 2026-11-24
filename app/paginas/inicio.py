@@ -57,7 +57,7 @@ else:
     st.dataframe(
         semana[["dia", "tempo", "temp_min_c", "temp_max_c", "chuva_mm", "prob_chuva_pct"]],
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
         column_config={
             "dia": "Dia",
             "tempo": "",
@@ -81,7 +81,7 @@ col1, col2 = st.columns([3, 2])
 col1.caption(
     f"Previsão Open-Meteo emitida em {pd.Timestamp(emitida):%d/%m às %Hh%M}." if emitida is not None else "Sem previsão."
 )
-if col2.button("🔄 Atualizar previsão", use_container_width=True):
+if col2.button("🔄 Atualizar previsão", width="stretch"):
     with st.spinner("Buscando a previsão mais recente..."):
         dados.atualizar_previsao()
     st.rerun()
