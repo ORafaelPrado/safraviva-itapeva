@@ -3,7 +3,7 @@
     python -m scripts.rotina_diaria            # o que o agendador roda todo dia às 6h
     python -m scripts.rotina_diaria --forcar-resumo
 
-Passos: previsão (Open-Meteo, inclui os últimos 45 dias) → NASA POWER → INMET do ano corrente (no dia 5
+Passos: previsão (Open-Meteo, inclui os últimos 45 dias) → NASA POWER → cotações (CEPEA, Chicago, dólar) → INMET do ano corrente (no dia 5
 de cada mês, quando o pacote mensal costuma sair) → transformações SQL → estimativas de safra → central de
 alertas → às segundas, o resumo semanal do Agrônomo Digital (se houver OPENAI_API_KEY).
 Log em data/logs/rotina_AAAA-MM-DD.log.
@@ -35,7 +35,7 @@ def main() -> None:
     log = logging.getLogger("rotina")
 
     hoje = date.today()
-    fontes = ("previsao", "nasa") + (("inmet",) if hoje.day == 5 else ())
+    fontes = ("previsao", "nasa", "cotacoes") + (("inmet",) if hoje.day == 5 else ())
     with conectar() as con:
         resumo = atualizacao.atualizar(con, fontes, transformar=True)
     log.info("Atualização: %s", json.dumps(resumo, ensure_ascii=False, default=str))

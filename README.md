@@ -12,7 +12,8 @@ O SafraViva junta **52 anos de produção agrícola (IBGE)**, **45 anos de clima
 - 🏠 **Hoje na lavoura:** alertas de geada, veranico, calor e chuva; a fase de cada talhão cruzada com o tempo; o melhor horário para pulverizar; a época de plantio.
 - 🔔 **Central de alertas:** só avisa o que importa, sem repetir; o alerta some quando a situação passa.
 - 🌾 **Estimativa de safra:** balanço hídrico FAO dia a dia + anos análogos desde 1991 → faixa provável de produtividade, **validada contra o IBGE**.
-- 🤖 **Agrônomo Digital:** chat com IA que consulta os dados (13 ferramentas), cita a fonte, respeita os limites (receituário agronômico, não é conselho de investimento) e **lança no caderno de campo o que o produtor dita**, com confirmação.
+- 🤖 **Agrônomo Digital:** chat com IA que consulta os dados (14 ferramentas), cita a fonte, respeita os limites (receituário agronômico, não é conselho de investimento) e **lança no caderno de campo o que o produtor dita**, com confirmação.
+- 📊 **Cotações ao vivo:** soja, milho, trigo e dólar. CEPEA (físico, histórico desde 1997), bolsa de Chicago convertida para R$/saca (~15 min de atraso) e dólar comercial/PTAX; sazonalidade, prêmio de porto e preço × custo por saca da fazenda. A tela se atualiza sozinha a cada 5 min e tem pergunta à IA ("subiu por Chicago ou pelo dólar?").
 - 💰 **Gestão:** caderno de campo, custos, colheita e vendas; custo por saca, **ponto de equilíbrio** e margem por talhão; comparação com a CONAB e com a média de Itapeva.
 - 📈 **Região:** Itapeva × SP × PR, safras boas e ruins com o clima de cada uma, geada por mês, aquecimento do verão.
 
@@ -46,6 +47,7 @@ flowchart LR
         OM[Open-Meteo<br/>previsão 16 dias]
         ZARC[MAPA / ZARC<br/>risco de plantio]
         CONAB[CONAB<br/>custos]
+        COT[CEPEA · CBOT · BCB<br/>cotações]
     end
     F --> ETL[ETL Python<br/>idempotente, com cache]
     ETL --> DB[(DuckDB<br/>raw → analytics → fazenda<br/>local ou MotherDuck)]
@@ -65,7 +67,7 @@ flowchart LR
 | Modelo | Balanço hídrico FAO-56 + FAO-33, cenários por anos análogos, backtest contra o IBGE |
 | IA | OpenAI (Chat Completions + function calling), provedor isolado atrás de uma interface |
 | Painel | Streamlit + Plotly, paleta validada para daltonismo, tema claro para o campo |
-| Qualidade | 80 testes (pytest + AppTest do Streamlit), avaliação do agente com 12 perguntas reais, CI no GitHub Actions |
+| Qualidade | 88 testes (pytest + AppTest do Streamlit), avaliação do agente com 12 perguntas reais, CI no GitHub Actions |
 
 ## Qualidade e validação
 - **Testes:** `pytest` cobre os parsers do ETL, as transformações SQL, as regras de alerta, a gestão (rateio, ponto de equilíbrio), o balanço hídrico, a central de alertas, o agente (com um modelo simulado) e as telas (preenchendo e enviando formulários com o AppTest).
@@ -107,7 +109,7 @@ O painel roda no **Streamlit Community Cloud**, protegido por senha, com o banco
 
 ```
 core/        configuração da região, cliente HTTP, conexão com o banco (local ou nuvem)
-etl/         extratores: IBGE, INMET, NASA POWER, Open-Meteo, ZARC, CONAB
+etl/         extratores: IBGE, INMET, NASA POWER, Open-Meteo, ZARC, CONAB, cotações (CEPEA, CBOT, BCB)
 sql/         ddl/ (camadas), transform/ (analytics), analises/ (12 perguntas de negócio)
 analytics/   modelo clima × produtividade, balanço hídrico, estilo dos gráficos
 ai/          Agrônomo Digital: ferramentas, laço de tool calling, prompt, resumo semanal
@@ -124,4 +126,4 @@ docs/        insights, fontes, decisões (D001–D025), dicionário de dados, co
 [Insights](docs/insights.md) · [Fontes](docs/fontes.md) · [Decisões técnicas](docs/decisoes.md) · [Dicionário de dados](docs/dicionario_dados.md) · [Conhecimento regional](docs/conhecimento_regional.md) · [Publicação](docs/publicacao.md) · [Roteiro original](PROMPT_MESTRE.md)
 
 ---
-Projeto de **Rafael Prado** · dados públicos de IBGE, INMET, NASA POWER, Open-Meteo (CC BY 4.0), MAPA/ZARC e CONAB.
+Projeto de **Rafael Prado** · dados públicos de IBGE, INMET, NASA POWER, Open-Meteo (CC BY 4.0), MAPA/ZARC, CONAB, CEPEA/ESALQ (CC BY-NC 4.0) e Banco Central.

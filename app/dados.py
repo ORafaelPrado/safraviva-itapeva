@@ -348,7 +348,9 @@ def estimativas(propriedade_id: int):
 
 def atualizar_se_preciso() -> str | None:
     """Ao abrir o painel: se a previsão tiver mais de 6 h, atualiza previsão + alertas. Uma vez por sessão."""
-    if st.session_state.get("_auto_atualizado"):
+    import os
+
+    if st.session_state.get("_auto_atualizado") or os.getenv("SAFRAVIVA_SEM_ATUALIZAR"):
         return None
     st.session_state["_auto_atualizado"] = True
     from app import atualizacao
@@ -359,3 +361,69 @@ def atualizar_se_preciso() -> str | None:
         return None
     ok, msg = gravar(atualizacao.atualizar)
     return None if ok else msg
+
+
+# ----------------------------------------------------------------------------------------
+# Cotações
+# ----------------------------------------------------------------------------------------
+IDADE_MAX_BOLSA_MIN = 15
+IDADE_MAX_CEPEA_H = 12
+
+
+def cotacoes_atualizar_se_preciso() -> str | None:
+    """Bolsa/dólar com mais de 15 min → atualização rápida; CEPEA com mais de 12 h → carga completa."""
+    import os
+
+    from etl import cotacoes
+
+    if os.getenv("SAFRAVIVA_SEM_ATUALIZAR"):  # testes: sem rede e sem gravar
+        return None
+
+    with conectar(leitura=True) as con:
+        ult = con.execute("SELECT max(carregado_em) FROM raw.cotacao_ultima").fetchone()[0]
+        cep = con.execute("SELECT max(carregado_em) FROM raw.cotacao_diaria WHERE serie LIKE 'cepea_%'").fetchone()[0]
+    agora = pd.Timestamp.now()
+    if cep is None or agora - pd.Timestamp(cep) > pd.Timedelta(hours=IDADE_MAX_CEPEA_H):
+        ok, msg = gravar(cotacoes.executar)
+    elif ult is None or agora - pd.Timestamp(ult) > pd.Timedelta(minutes=IDADE_MAX_BOLSA_MIN):
+        ok, msg = gravar(cotacoes.executar_rapido)
+    else:
+        return None
+    return None if ok else msg
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def cotacao_resumo() -> pd.DataFrame:
+    """Último valor de cada série diária, com a variação sobre o dia anterior."""
+    return consultar("""
+        WITH r AS (SELECT *, row_number() OVER (PARTITION BY serie ORDER BY data DESC) AS n FROM raw.cotacao_diaria)
+        SELECT a.serie, a.cultura, a.nome, a.data, coalesce(a.valor_rs_sc, a.valor) AS valor,
+               100 * (coalesce(a.valor_rs_sc, a.valor) / coalesce(b.valor_rs_sc, b.valor) - 1) AS variacao_pct, a.fonte
+        FROM r a LEFT JOIN r b ON b.serie = a.serie AND b.n = 2
+        WHERE a.n = 1""")
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def cotacao_bolsa() -> pd.DataFrame:
+    return consultar("SELECT * FROM raw.cotacao_ultima")
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def cotacao_intradia(serie: str) -> pd.DataFrame:
+    return consultar("SELECT ts, valor FROM raw.cotacao_intradia WHERE serie = ? ORDER BY ts", [serie])
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def cotacao_historico(series: tuple[str, ...], desde: str) -> pd.DataFrame:
+    return consultar("""SELECT serie, nome, data, coalesce(valor_rs_sc, valor) AS valor FROM raw.cotacao_diaria
+                        WHERE serie IN (SELECT unnest(?)) AND data >= CAST(? AS DATE) ORDER BY data""",
+                     [list(series), desde])
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def cotacao_sazonalidade(serie: str) -> pd.DataFrame:
+    return consultar("""
+        WITH m AS (SELECT year(data) AS ano, month(data) AS mes, avg(coalesce(valor_rs_sc, valor)) AS v
+                   FROM raw.cotacao_diaria WHERE serie = ? AND data >= current_date - INTERVAL 10 YEAR GROUP BY 1, 2),
+             a AS (SELECT ano, avg(v) AS va FROM m GROUP BY 1 HAVING count(*) = 12)
+        SELECT mes, 100 * (avg(v / va) - 1) AS desvio_pct FROM m JOIN a USING (ano) GROUP BY mes ORDER BY mes""", [serie])

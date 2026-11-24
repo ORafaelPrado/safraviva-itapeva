@@ -15,7 +15,7 @@ import time
 
 from core import config
 from core.db import conectar
-from etl import conab_custos, ibge, inmet, nasa_power, open_meteo, zarc
+from etl import conab_custos, cotacoes, ibge, inmet, nasa_power, open_meteo, zarc
 from scripts import setup_db
 
 # A ordem importa: o NASA POWER usa os centroides carregados pelo IBGE.
@@ -26,6 +26,7 @@ EXTRATORES = {
     "inmet": inmet.executar,
     "zarc": zarc.executar,
     "conab": conab_custos.executar,
+    "cotacoes": cotacoes.executar,
 }
 
 log = logging.getLogger("etl")

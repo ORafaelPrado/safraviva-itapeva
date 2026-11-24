@@ -105,3 +105,10 @@ Assim, a rotina pode rodar várias vezes por dia sem encher a tela (nem o WhatsA
 - **Rotina diária pelo GitHub Actions** (`.github/workflows/rotina_diaria.yml`, 6h de Brasília), sem depender do computador de casa.
 - **Senha** (`APP_SENHA` nos segredos do Streamlit) protege os dados da fazenda e os créditos da OpenAI. Em casa, sem a variável, o painel abre direto.
 - **Proteção contra sobrescrita:** depois de publicado, o banco **oficial é o da nuvem**. `publicar_motherduck.py` se recusa a sobrescrevê-lo sem `--substituir` e oferece `--baixar` para backup.
+
+## D026 — Cotações "em tempo real": o que é ao vivo e o que é diário (24/11/2026)
+- **Ao vivo** (atualiza sozinho a cada 5 min na tela; busca nova se o dado tiver mais de 15 min): bolsa de Chicago e dólar comercial, com ~15 min de atraso (Yahoo Finance, fonte não oficial).
+- **Diário:** CEPEA, que é o preço do físico no Brasil e sai à tarde, e a PTAX. A série completa do CEPEA (desde 1997/2004) permite histórico e sazonalidade.
+- **Conversão:** Chicago vira R$/saca pela paridade (US¢/bushel × 60/kg por bushel × dólar), sem prêmio, frete nem impostos. A tela mostra o prêmio de porto (Paranaguá − Chicago).
+- **Preço de referência da fazenda:** passa a vir do CEPEA de forma automática, mas um preço digitado pelo produtor nunca é sobrescrito.
+- **IA:** a ferramenta `cotacoes` entrega a **decomposição Chicago × dólar** calculada por regra. Na primeira resposta real, o modelo leu "Chicago em reais" (que já inclui o câmbio) e atribuiu a alta à bolsa, quando em dólar a soja estava estável e a alta veio do dólar (+9,8%). Mesma lição do D020: interpretação pronta na ferramenta em vez de inferência do modelo.

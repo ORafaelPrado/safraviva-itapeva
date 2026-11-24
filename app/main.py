@@ -41,6 +41,9 @@ navegacao = st.navigation(
             st.Page(PAGINAS / "clima.py", title="Previsão do tempo", icon="🌦️"),
             st.Page(PAGINAS / "plantio.py", title="Janela de plantio", icon="🌱"),
         ],
+        "Mercado": [
+            st.Page(PAGINAS / "cotacoes.py", title="Cotações", icon="📊"),
+        ],
         "Assistente": [
             st.Page(PAGINAS / "agronomo.py", title="Agrônomo Digital", icon="🤖"),
         ],

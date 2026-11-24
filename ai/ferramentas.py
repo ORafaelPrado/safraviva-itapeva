@@ -560,6 +560,105 @@ def alertas_ativos(ctx: Contexto) -> dict:
 
 
 # --------------------------------------------------------------------------------------------
+# Cotações
+# --------------------------------------------------------------------------------------------
+
+SERIES_POR_CULTURA = {
+    "soja": ["cepea_soja_parana", "cepea_soja_paranagua", "cbot_soja"],
+    "milho": ["cepea_milho", "cbot_milho"],
+    "trigo": ["cepea_trigo_parana", "cbot_trigo"],
+    "dolar": ["dolar", "dolar_ptax"],
+}
+
+
+def _pct(fracao: float) -> str:
+    return f"{100 * fracao:+.1f}%".replace(".", ",")
+
+
+def _decompor(cultura: str, dias: int) -> dict:
+    """Quanto da variação em R$ veio da bolsa (em dólar) e quanto veio do câmbio, no período.
+
+    Calculado por regra a partir da própria série convertida (dólar implícito = R$/sc ÷ US$/sc), para a IA
+    não confundir "Chicago em reais" com "Chicago em dólar".
+    """
+    import math
+
+    from etl.cotacoes import KG_POR_BUSHEL
+
+    df = _ler(f"""
+        WITH u AS (SELECT max(data) AS d FROM raw.cotacao_diaria WHERE serie = ?)
+        SELECT data, valor, valor_rs_sc FROM raw.cotacao_diaria, u
+        WHERE serie = ? AND data >= u.d - INTERVAL {dias} DAY AND valor_rs_sc IS NOT NULL ORDER BY data""",
+              [f"cbot_{cultura}", f"cbot_{cultura}"])
+    if len(df) < 2:
+        return {"erro": "série de Chicago insuficiente no período"}
+    ini, fim = df.iloc[0], df.iloc[-1]
+    fator = 60 / KG_POR_BUSHEL[cultura] / 100
+    dolar_ini, dolar_fim = ini.valor_rs_sc / (ini.valor * fator), fim.valor_rs_sc / (fim.valor * fator)
+    v_bolsa, v_dolar, v_reais = fim.valor / ini.valor - 1, dolar_fim / dolar_ini - 1, fim.valor_rs_sc / ini.valor_rs_sc - 1
+    motor = "o dólar" if abs(math.log1p(v_dolar)) > abs(math.log1p(v_bolsa)) else "a bolsa de Chicago"
+    return {
+        "periodo": f"{pd.Timestamp(ini.data):%d/%m/%Y} a {pd.Timestamp(fim.data):%d/%m/%Y}",
+        "chicago_em_dolar_pct": round(float(100 * v_bolsa), 2),
+        "dolar_pct": round(float(100 * v_dolar), 2),
+        "chicago_em_reais_pct": round(float(100 * v_reais), 2),
+        "leitura": (f"Em dólar, Chicago variou {_pct(v_bolsa)}; o dólar variou {_pct(v_dolar)}; em reais, "
+                    f"{_pct(v_reais)}. Quem mais pesou foi {motor}."),
+    }
+
+
+def cotacoes(ctx: Contexto, cultura: str, dias: int = 30) -> dict:
+    """Preço agora, variação no período, sazonalidade histórica e o preço frente ao custo da fazenda."""
+    if cultura not in SERIES_POR_CULTURA:
+        return {"erro": "Use soja, milho, trigo ou dolar."}
+    dias = max(5, min(int(dias), 3650))
+    series = SERIES_POR_CULTURA[cultura]
+    resumo = _ler(f"""
+        WITH s AS (SELECT * FROM raw.cotacao_diaria WHERE serie IN (SELECT unnest(?))),
+             ult AS (SELECT serie, max(data) AS data FROM s GROUP BY 1),
+             per AS (SELECT s.serie, min(coalesce(valor_rs_sc, valor)) AS minimo, max(coalesce(valor_rs_sc, valor)) AS maximo,
+                            avg(coalesce(valor_rs_sc, valor)) AS media,
+                            arg_min(coalesce(valor_rs_sc, valor), s.data) AS inicio_periodo
+                     FROM s JOIN ult USING (serie) WHERE s.data >= ult.data - INTERVAL {dias} DAY GROUP BY 1)
+        SELECT s.serie, s.nome, s.data AS ultimo_dia, coalesce(s.valor_rs_sc, s.valor) AS valor,
+               CASE WHEN s.valor_rs_sc IS NULL THEN s.unidade ELSE 'R$/sc 60 kg' END AS unidade,
+               per.minimo, per.maximo, per.media, 100 * (coalesce(s.valor_rs_sc, s.valor) / per.inicio_periodo - 1) AS variacao_periodo_pct,
+               s.fonte
+        FROM s JOIN ult USING (serie, data) JOIN per USING (serie) ORDER BY s.serie""", [series])
+    agora = _ler("""SELECT nome, preco, unidade, round(variacao_pct, 2) AS variacao_hoje_pct, preco_rs_sc,
+                           strftime(horario_mercado, '%d/%m %H:%M') AS horario
+                    FROM raw.cotacao_ultima WHERE serie IN (SELECT unnest(?))""", [series])
+    principal = series[0]
+    sazonal = _ler("""
+        WITH m AS (SELECT year(data) AS ano, month(data) AS mes, avg(coalesce(valor_rs_sc, valor)) AS v
+                   FROM raw.cotacao_diaria WHERE serie = ? AND data >= current_date - INTERVAL 10 YEAR GROUP BY 1, 2),
+             a AS (SELECT ano, avg(v) AS va FROM m GROUP BY 1 HAVING count(*) = 12)
+        SELECT mes, round(100 * (avg(v / va) - 1), 1) AS desvio_medio_vs_ano_pct
+        FROM m JOIN a USING (ano) GROUP BY mes ORDER BY mes""", [principal])
+    saida = {
+        "cultura": cultura,
+        "fonte": "CEPEA/ESALQ (físico, diário, CC BY-NC 4.0); CBOT via Yahoo Finance (atraso ~15 min); "
+                 "dólar comercial (Yahoo) e PTAX (Banco Central)",
+        "nota": "CBOT em R$/sc = paridade Chicago, sem prêmio de porto, frete e impostos. O CEPEA sai uma vez por dia.",
+        "ultimos_e_periodo": _registros(resumo, casas=2),
+        "bolsa_agora": _registros(agora, casas=2),
+        f"sazonalidade_{principal}_ultimos_10_anos": _registros(sazonal),
+        "nota_sazonalidade": "média histórica de cada mês em relação à média do ano. É padrão do passado, não previsão.",
+    }
+    if cultura != "dolar":
+        saida["decomposicao_chicago_x_dolar"] = _decompor(cultura, dias)
+    if cultura == "soja":
+        premio = _ler("""SELECT a.data, round(a.valor_rs_sc - b.valor_rs_sc, 2) AS premio_paranagua_vs_chicago_rs_sc
+                         FROM raw.cotacao_diaria a JOIN raw.cotacao_diaria b USING (data)
+                         WHERE a.serie = 'cepea_soja_paranagua' AND b.serie = 'cbot_soja' ORDER BY a.data DESC LIMIT 1""")
+        saida["premio_porto"] = _registros(premio, casas=2)
+    if cultura != "dolar" and ctx.propriedade_id is not None:
+        estoque = [e for e in _estoque(ctx.propriedade_id) if e["cultura"] == cultura]
+        saida["fazenda"] = {"propriedade": _propriedade(ctx), "estoque_e_custo_por_saca": estoque}
+    return saida
+
+
+# --------------------------------------------------------------------------------------------
 # Catálogo: função + esquema JSON (formato de tools da OpenAI, reaproveitável em outros provedores)
 # --------------------------------------------------------------------------------------------
 
@@ -611,6 +710,11 @@ FERRAMENTAS: dict[str, tuple[Callable[..., dict], dict]] = {
         "estimativa_safra", "Produtividade provável (p10/p50/p90) de cada lavoura plantada pela água no solo, perda por falta de água até hoje, ponto de equilíbrio e confiabilidade do modelo.")),
     "alertas_ativos": (alertas_ativos, _f(
         "alertas_ativos", "Alertas ativos agora na central (geada, veranico, calor, chuva, fase das lavouras, janela de plantio, estimativa de safra).")),
+    "cotacoes": (cotacoes, _f(
+        "cotacoes", "Cotações de soja, milho, trigo ou dólar: CEPEA (físico, diário), bolsa de Chicago em R$/saca (atraso ~15 min), variação no período, mínimo/máximo, sazonalidade histórica por mês, prêmio de porto (soja) e, se houver fazenda, estoque e custo por saca.",
+        {"cultura": {"type": "string", "enum": ["soja", "milho", "trigo", "dolar"]},
+         "dias": {"type": "integer", "minimum": 5, "maximum": 3650, "description": "Período para variação/mín/máx. Padrão 30."}},
+        ["cultura"])),
     "propor_lancamento": (propor_lancamento, _f(
         "propor_lancamento", "Prepara um lançamento no caderno da fazenda a partir do que o produtor contou (operação, despesa, colheita ou ocorrência). NÃO grava: fica pendente até o produtor confirmar na tela.",
         {"registro": {"type": "string", "enum": ["operacao", "despesa", "colheita", "ocorrencia"]},

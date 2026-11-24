@@ -40,11 +40,11 @@ def atualizar_alertas(con: duckdb.DuckDBPyConnection) -> dict:
 
 def atualizar(con: duckdb.DuckDBPyConnection, fontes: tuple[str, ...] = ("previsao",),
               transformar: bool = False) -> dict:
-    from etl import inmet, nasa_power, open_meteo
+    from etl import cotacoes, inmet, nasa_power, open_meteo
     from scripts import rodar_etl, setup_db
 
     setup_db.aplicar_ddl(con)
-    extratores = {"previsao": open_meteo.executar, "nasa": nasa_power.executar,
+    extratores = {"previsao": open_meteo.executar, "nasa": nasa_power.executar, "cotacoes": cotacoes.executar,
                   "inmet": lambda c: inmet.executar(c, anos=range(datetime.now().year, datetime.now().year + 1))}
     resumo = {}
     for fonte in fontes:

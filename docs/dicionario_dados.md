@@ -75,3 +75,10 @@ Referências: `raw.conab_custo` (planilhas CONAB) → `analytics.custo_referenci
 | `raw.clima_recente_diario` | dia (últimos 45) | chuva, ET0, Tmáx/Tmín do Open-Meteo, para cobrir o atraso da série observada no balanço hídrico |
 
 A estimativa de safra é calculada sob demanda (`analytics/balanco_hidrico.py`) e não fica gravada; o painel guarda em cache por 30 min.
+
+## Cotações
+| Tabela | Grão | Destaques |
+|---|---|---|
+| `raw.cotacao_diaria` | série × dia | `serie` (cepea_soja_parana, cepea_soja_paranagua, cepea_milho, cepea_trigo_parana, cbot_soja/milho/trigo, dolar, dolar_ptax), `valor` na unidade original, `valor_rs_sc` normalizado para R$/saca 60 kg |
+| `raw.cotacao_intradia` | série × 15 min (bolsa) / 5 min (dólar) | último pregão |
+| `raw.cotacao_ultima` | série de bolsa | preço, variação do dia, horário do mercado, `preco_rs_sc` |

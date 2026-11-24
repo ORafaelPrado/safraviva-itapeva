@@ -46,6 +46,7 @@ NOMES_FERRAMENTA = {
     "producao_regional": "produção regional (IBGE)", "conhecimento_regional": "base regional",
     "propor_lancamento": "preparar lançamento",
     "estimativa_safra": "estimativa de safra", "alertas_ativos": "central de alertas",
+    "cotacoes": "cotações (CEPEA, Chicago, dólar)",
 }
 
 

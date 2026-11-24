@@ -11,3 +11,4 @@ import pytest
 @pytest.fixture(autouse=True)
 def _sem_banco_na_nuvem(monkeypatch):
     monkeypatch.delenv("MOTHERDUCK_TOKEN", raising=False)
+    monkeypatch.setenv("SAFRAVIVA_SEM_ATUALIZAR", "1")  # telas não buscam dados na internet durante os testes

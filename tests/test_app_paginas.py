@@ -67,7 +67,7 @@ def test_resultados_renderiza_com_plantio_aberto(banco_temporario):
 
 @pytest.mark.skipif(not config.CAMINHO_DB.exists(), reason="banco real ainda não carregado")
 @pytest.mark.parametrize("pagina", ["inicio.py", "clima.py", "plantio.py", "producao.py", "safras.py",
-                                    "fazenda.py", "lancar.py", "caderno.py", "alertas.py", "estimativa.py"])
+                                    "fazenda.py", "lancar.py", "caderno.py", "alertas.py", "estimativa.py", "cotacoes.py", "agronomo.py"])
 def test_paginas_rodam_sem_erro_no_banco_real(pagina):
     with duckdb.connect(str(config.CAMINHO_DB), read_only=True) as con:
         props = con.execute("SELECT id FROM fazenda.propriedade ORDER BY demo, id LIMIT 1").fetchall()

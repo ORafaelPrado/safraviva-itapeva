@@ -22,6 +22,13 @@ Validadas com chamadas reais em **15/10/2026** (`python -m scripts.validar_fonte
 
 Observação: o portal `portaldeinformacoes.conab.gov.br` não responde daqui (erro de certificado/conexão). As planilhas no gov.br funcionam.
 
+## Cotações (24/11/2026)
+| Fonte | Endpoint | O que é | Licença / observação |
+|---|---|---|---|
+| **CEPEA/ESALQ** | `cepea.org.br/br/indicador/series/{produto}.aspx?id=…` (planilha) | Preço do físico, diário: soja Paraná (id 12, desde 1997) e Paranaguá (92), milho ESALQ/B3 Campinas (77), trigo Paraná (178, em R$/t → convertido para R$/sc) | **CC BY-NC 4.0**: uso não comercial com crédito. A planilha vem com uma irregularidade de formato (lida com `ignore_workbook_corruption`) |
+| **CBOT via Yahoo Finance** | `query1.finance.yahoo.com/v8/finance/chart/{ZS=F, ZC=F, ZW=F, BRL=X}` | Futuros de Chicago (US¢/bushel) e dólar comercial; intradiário de 15 min (bolsa) e 5 min (dólar); histórico diário de 2 anos | **Não oficial**, pode mudar sem aviso; atraso de ~10–15 min. Convertido para R$/sc sem prêmio, frete e impostos |
+| **Banco Central (PTAX)** | `olinda.bcb.gov.br/olinda/servico/PTAX/...` | Dólar PTAX oficial, diário | API pública oficial |
+
 ## Ainda não validadas (próximas fases)
 - **IEA-SP / CATI-LUPA** — estatísticas do EDR de Itapeva e preços regionais.
 - **Embrapa Solos** — tipo de solo (necessário para escolher a linha correta do ZARC).
