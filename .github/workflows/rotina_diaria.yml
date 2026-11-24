@@ -14,6 +14,7 @@ jobs:
       MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: gpt-5-mini
+      TZ: America/Sao_Paulo
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

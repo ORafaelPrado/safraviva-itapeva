@@ -7,6 +7,7 @@ Todos os códigos abaixo foram validados contra as APIs oficiais na Fase 0
 from __future__ import annotations
 
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +15,13 @@ from dotenv import load_dotenv
 
 RAIZ = Path(__file__).resolve().parent.parent
 load_dotenv(RAIZ / ".env")
+
+# Todo o sistema trabalha no horário de Brasília, inclusive em servidores em UTC (GitHub Actions,
+# Streamlit Cloud). Sem isso, "hoje", "previsão velha" e "cotação de 15 min atrás" seriam calculados
+# com relógios diferentes em casa e na nuvem. (No Windows não há tzset; lá o relógio já é o local.)
+os.environ.setdefault("TZ", "America/Sao_Paulo")
+if hasattr(time, "tzset"):
+    time.tzset()
 
 DIR_DADOS = RAIZ / "data"
 DIR_RAW = DIR_DADOS / "raw"
