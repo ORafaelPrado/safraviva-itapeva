@@ -103,6 +103,8 @@ pytest
 </details>
 
 ## Painel online
+🔗 **https://safraviva-itapeva.streamlit.app** (protegido por senha: dados de uma fazenda real)
+
 O painel roda no **Streamlit Community Cloud**, protegido por senha, com o banco no **MotherDuck**. Os dados são atualizados todo dia às 6h por um **GitHub Actions** ([rotina_diaria.yml](.github/workflows/rotina_diaria.yml)). O passo a passo está em [docs/publicacao.md](docs/publicacao.md). Nenhum dado da fazenda fica neste repositório.
 
 ## Estrutura

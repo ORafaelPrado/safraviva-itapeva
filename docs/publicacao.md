@@ -9,11 +9,11 @@ Como o projeto vai para a internet, e o que fica onde.
 | Streamlit Community Cloud | o painel | link aberto, mas **pede senha** |
 | Segredos (Streamlit e GitHub) | `MOTHERDUCK_TOKEN`, `OPENAI_API_KEY`, `APP_SENHA` | não |
 
-## Situação (24/11/2026)
+## Situação (24/11/2026): publicado
 - ✅ Repositório público: https://github.com/ORafaelPrado/safraviva-itapeva (testes passando no GitHub Actions)
 - ✅ Banco publicado no MotherDuck (`md:safraviva`); a rotina diária e todas as telas foram testadas contra ele
-- ⏳ Segredo `MOTHERDUCK_TOKEN` no GitHub e primeira execução da rotina na nuvem (passo 3)
-- ⏳ Painel no Streamlit Community Cloud (passo 4)
+- ✅ Segredo `MOTHERDUCK_TOKEN` no GitHub; a rotina diária rodou na nuvem com sucesso (horário de Brasília)
+- ✅ Painel no ar: https://safraviva-itapeva.streamlit.app (senha confere antes de qualquer página, inclusive em links diretos)
 
 > Com o `MOTHERDUCK_TOKEN` no `.env`, o painel **em casa também usa a nuvem** (os mesmos dados do celular).
 > Os testes (`pytest`) nunca usam a nuvem: `tests/conftest.py` remove o token.
