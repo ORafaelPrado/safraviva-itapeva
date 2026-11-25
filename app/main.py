@@ -29,8 +29,15 @@ def _recarregar_codigo_novo() -> None:
         (str(p), p.stat().st_mtime_ns) for pasta in pacotes for p in (RAIZ / pasta).glob("*.py")))
     anterior = sys.modules.get("_safraviva_assinatura")
     sys.modules["_safraviva_assinatura"] = assinatura  # type: ignore[assignment]
-    if anterior is None or anterior == assinatura:  # 1ª execução do processo: tudo já é novo
+    if anterior == assinatura:
         return
+    if anterior is None:  # 1ª vez que esta verificação roda neste processo
+        inicio = Path("/proc/self")  # Linux (Streamlit Cloud): hora em que o processo começou
+        if not inicio.exists():
+            return  # Windows: o servidor local é reiniciado a cada mudança
+        comecou = inicio.stat().st_ctime_ns
+        if all(mtime <= comecou for _, mtime in assinatura):
+            return  # nenhum arquivo mudou depois que o processo começou: os módulos estão em dia
     for nome in [n for n in sys.modules if n.split(".")[0] in pacotes and "." in n]:
         pai, _, filho = nome.rpartition(".")
         sys.modules.pop(nome, None)

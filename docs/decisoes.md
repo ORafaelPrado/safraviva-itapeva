@@ -133,5 +133,5 @@ Assim, a rotina pode rodar várias vezes por dia sem encher a tela (nem o WhatsA
 
 ## D030 — Código novo no Streamlit Cloud sem reiniciar o app (25/11/2026)
 - Depois do envio da ficha, a tela `/ficha` online deu `AttributeError` em `ui.titulo`: o Streamlit relê o `main.py` e as páginas a cada execução, mas mantém na memória os módulos importados (`app.ui` antigo, sem a função nova).
-- `main.py` agora compara a data de modificação de todos os `.py` de `app/`, `ai/`, `analytics/`, `core/` e `etl/`. Se algum mudou desde a última execução do processo, ele esquece esses módulos (inclusive o atributo no pacote, senão `from app import ui` devolve o antigo). Na primeira execução não faz nada.
+- `main.py` agora compara a data de modificação de todos os `.py` de `app/`, `ai/`, `analytics/`, `core/` e `etl/`. Se algum mudou desde a execução anterior (ou, na primeira vez, depois que o processo começou, lida em `/proc/self` no Linux do Streamlit Cloud), ele esquece esses módulos, inclusive o atributo no pacote, senão `from app import ui` devolve o antigo. No Windows, a primeira execução não faz nada (o servidor local é reiniciado).
 - Conferido no navegador: alterar `ui.py` com o servidor ligado passou a valer na hora; antes, só reiniciando.
