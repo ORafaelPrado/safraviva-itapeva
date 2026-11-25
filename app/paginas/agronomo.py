@@ -7,7 +7,7 @@ import streamlit as st
 from ai.agente import Agente, ProvedorOpenAI, confirmar_pendente
 from ai.ferramentas import Contexto
 from ai.registro import registrar
-from app import dados, ui
+from app import dados, eventos, ui
 
 ui.titulo("Agrônomo Digital", "Pergunte como perguntaria ao agrônomo. Ele consulta os dados do SafraViva e diz de onde tirou cada número.")
 st.caption("É orientação: defensivo só com receituário agronômico.")
@@ -73,7 +73,7 @@ with st.expander("Resumo da semana", icon=":material/calendar_today:"):
 
 # --- histórico -------------------------------------------------------------------------------
 for msg in st.session_state["chat"]:
-    with st.chat_message(msg["role"], avatar="🧑‍🌾" if msg["role"] == "user" else "🌱"):
+    with st.chat_message(msg["role"], avatar=":material/person:" if msg["role"] == "user" else ":material/eco:"):
         st.markdown(msg["content"])
         mostrar_ferramentas(msg.get("ferramentas", []))
 
@@ -82,11 +82,13 @@ for i, pendente in enumerate(list(st.session_state["pendentes"])):
     with st.container(border=True):
         st.markdown(f"**Lançamento para confirmar:** {pendente['resumo']}")
         c1, c2 = st.columns(2)
-        if c1.button("✅ Confirmar", key=f"ok_{i}", type="primary", width="stretch"):
+        if c1.button("Confirmar", key=f"ok_{i}", type="primary", width="stretch", icon=":material/check:"):
             ok, msg = dados.gravar(confirmar_pendente, pendente)
+            if ok:
+                eventos.registrar("lancamento_salvo", "agronomo", "ditado_ia")
             st.session_state["pendentes"].pop(i)
             st.session_state["chat"].append({"role": "assistant",
-                                             "content": "✅ Lançado no caderno de campo." if ok else f"❌ {msg}"})
+                                             "content": "Lançado no caderno de campo." if ok else f"Não deu para lançar: {msg}"})
             st.rerun()
         if c2.button("Cancelar", key=f"nao_{i}", width="stretch"):
             st.session_state["pendentes"].pop(i)
@@ -103,10 +105,11 @@ if not st.session_state["chat"] and not pergunta:
             pergunta = s
 
 if pergunta:
+    eventos.registrar("pergunta_ia", "agronomo", "sugestao" if pergunta in SUGESTOES else "digitada")
     st.session_state["chat"].append({"role": "user", "content": pergunta})
-    with st.chat_message("user", avatar="🧑‍🌾"):
+    with st.chat_message("user", avatar=":material/person:"):
         st.markdown(pergunta)
-    with st.chat_message("assistant", avatar="🌱"):
+    with st.chat_message("assistant", avatar=":material/eco:"):
         with st.spinner("Consultando os dados..."):
             try:
                 ctx = Contexto(propriedade_id=pid)

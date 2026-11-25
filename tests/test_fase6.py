@@ -99,3 +99,31 @@ def test_estimativa_gera_alerta_so_quando_o_modelo_e_confiavel(con):
     assert alertas["estimativa|plantio:1"].nivel == "critico"      # p50 abaixo do ponto de equilíbrio
     assert alertas["estimativa|plantio:2"].nivel == "atencao"      # 20% abaixo da meta
     assert "estimativa|plantio:3" not in alertas                    # trigo: modelo hídrico pouco confiável
+
+
+def test_relatorio_de_uso_monta_o_funil():
+    """Funil do passo 6: viu o veredito → clicou → agiu, e dias de uso por semana."""
+    from datetime import datetime, timedelta
+
+    import duckdb
+
+    from app import eventos
+    from scripts import relatorio_uso
+
+    con = duckdb.connect()
+    agora = datetime.now()
+    linhas = [
+        (agora, "s1", "ab_view", "inicio", "v=A", "celular"),
+        (agora, "s1", "pagina_vista", "inicio", None, "celular"),
+        (agora, "s1", "cta_click", "inicio", "agronomo|v=A", "celular"),
+        (agora, "s1", "pagina_vista", "agronomo", None, "celular"),
+        (agora, "s1", "pergunta_ia", "agronomo", "sugestao", "celular"),
+        (agora - timedelta(days=1), "s2", "ab_view", "inicio", "v=B", "celular"),
+        (agora - timedelta(days=1), "s2", "pagina_vista", "inicio", None, "celular"),
+    ]
+    eventos.gravar(con, linhas)
+    r = relatorio_uso.resumo(relatorio_uso.sessoes(con, 30))
+    assert r["sessoes"] == 2 and r["dias_com_uso"] == 2
+    assert (r["viu_veredito_pct"], r["clicou_pct"], r["agiu_pct"]) == (100, 50, 50)
+    assert r["por_versao"]["A"]["agiu"] == 1.0 and r["por_versao"]["B"]["clicou"] == 0.0
+    assert relatorio_uso.resumo(relatorio_uso.sessoes(duckdb.connect(), 30)) == {"sessoes": 0}

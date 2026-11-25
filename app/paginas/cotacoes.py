@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from app import dados, ui
+from app import dados, eventos, ui
 
 ui.titulo("Cotações", "Quanto está a saca hoje e se o preço mexeu por causa de Chicago ou do dólar.")
 st.caption("**CEPEA/ESALQ:** preço do físico no Brasil, uma vez por dia (sai à tarde). **Chicago (CBOT):** bolsa ao vivo, "
@@ -139,7 +139,7 @@ else:
 
     st.session_state.setdefault("chat_cotacoes", [])
     for m in st.session_state["chat_cotacoes"]:
-        with st.chat_message(m["role"], avatar="🧑‍🌾" if m["role"] == "user" else "🌱"):
+        with st.chat_message(m["role"], avatar=":material/person:" if m["role"] == "user" else ":material/eco:"):
             st.markdown(m["content"])
     sugestoes = [f"Como está o preço da {c['nome'].lower()} hoje?",
                  f"Em que meses a {c['nome'].lower()} costuma pagar melhor?",
@@ -153,6 +153,7 @@ else:
                 pergunta = s
     pergunta = st.chat_input("Ex.: a soja subiu por causa de Chicago ou do dólar?", key="entrada_cotacoes") or pergunta
     if pergunta:
+        eventos.registrar("pergunta_ia", "cotacoes", "sugestao" if pergunta in sugestoes else "digitada")
         st.session_state["chat_cotacoes"].append({"role": "user", "content": pergunta})
         with st.spinner("Consultando as cotações..."):
             try:

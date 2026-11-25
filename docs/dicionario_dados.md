@@ -87,3 +87,5 @@ A estimativa de safra é calculada sob demanda (`analytics/balanco_hidrico.py`) 
 | Tabela | Grão | Colunas |
 |---|---|---|
 | `uso.evento` | um evento | `ts`, `sessao` (id aleatório por sessão), `evento` (`pagina_vista` · `ab_view` · `cta_click`), `pagina`, `detalhe` (ex.: `agronomo\|v=B`), `dispositivo` (`celular` · `computador`). Sem dado pessoal. |
+
+Eventos de ação (passo 6): `pergunta_ia` (detalhe `sugestao` ou `digitada`; página `agronomo` ou `cotacoes`) e `lancamento_salvo` (detalhe = tipo, ex.: `colheita`, ou `ditado_ia` quando confirmado no Agrônomo). Relatório: `python -m scripts.relatorio_uso`.

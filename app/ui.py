@@ -168,6 +168,7 @@ def tela_entrada() -> None:
               <h1>Abra e saiba se hoje é dia de entrar na lavoura.</h1>
               <p>Tempo, lavoura, mercado e contas da fazenda em um só lugar, com dados de Itapeva-SP.</p>
               <ul class="sv-fatos">{fatos}</ul>
+              <p class="sv-privacidade">Acesso com senha: os dados da fazenda não são públicos.</p>
             </div>"""
     )
 

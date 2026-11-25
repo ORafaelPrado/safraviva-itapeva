@@ -62,6 +62,7 @@ input::placeholder, textarea::placeholder {color: var(--sv-texto-2) !important; 
 .sv-entrada img {height: 44px; width: auto;}
 .sv-entrada h1 {font-size: clamp(1.6rem, 6vw, 2.3rem) !important; line-height: 1.15; margin: 18px 0 8px; padding: 0;}
 .sv-entrada p {color: var(--sv-texto-2); font-size: 1.05rem; margin: 0 0 14px;}
+.sv-privacidade {font-size: 0.85rem !important; color: var(--sv-texto-3) !important; margin: -6px 0 14px !important;}
 .sv-fatos {display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none;}
 .sv-fatos li {font-size: 0.85rem; color: var(--sv-texto); background: var(--sv-superficie); border: 1px solid var(--sv-borda);
               border-radius: 999px; padding: 5px 12px; margin: 0;}

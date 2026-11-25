@@ -7,7 +7,7 @@ from datetime import date
 
 import streamlit as st
 
-from app import dados, gestao, ui
+from app import dados, eventos, gestao, ui
 
 ui.titulo("Lançar", "Anote o que foi feito: operação, despesa, colheita, venda ou problema na lavoura.")
 pid = ui.propriedade_atual()
@@ -38,6 +38,7 @@ opcoes_todos = {int(r.id): rotulo_plantio(r) + f" ({r.status})" for r in plantio
 def sucesso(ok: bool, msg, texto: str) -> None:
     if ok:
         st.success(texto)
+        eventos.registrar("lancamento_salvo", "lancar", texto.split()[0].lower())  # só o tipo, sem valores
     else:
         st.error(msg)
 
