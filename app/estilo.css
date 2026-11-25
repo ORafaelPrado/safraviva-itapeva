@@ -59,6 +59,44 @@ h1 {font-size: 1.9rem !important; letter-spacing: -0.01em;}
 .sv-fatos li {font-size: 0.85rem; color: var(--sv-texto); background: var(--sv-superficie); border: 1px solid var(--sv-borda);
               border-radius: 999px; padding: 5px 12px; margin: 0;}
 
+/* ---------------------------------------------------------------------------------------------
+   Movimento (docs/design/passo-3-movimento.md): curto, discreto, só opacity/transform, sem JS.
+   Nunca se mexem: números de decisão, gráficos, alertas, menu. */
+:root {--sv-dur: 220ms; --sv-curva: cubic-bezier(.2, .7, .2, 1);}
+@keyframes sv-entra {from {opacity: 0; transform: translateY(6px);} to {opacity: 1; transform: none;}}
+@keyframes sv-pulso {0%, 100% {opacity: 1;} 50% {opacity: .35;}}
+
+/* entrada: só o veredito do dia e a tela de entrada */
+.sv-heroi, .sv-entrada {animation: sv-entra var(--sv-dur) var(--sv-curva) both;}
+.sv-heroi .sv-num {animation: sv-entra var(--sv-dur) var(--sv-curva) both;}
+.sv-heroi .sv-num:nth-child(1) {animation-delay: 80ms;}
+.sv-heroi .sv-num:nth-child(2) {animation-delay: 120ms;}
+.sv-heroi .sv-num:nth-child(3) {animation-delay: 160ms;}
+
+/* botões: resposta ao toque (!important: o Streamlit injeta o próprio :hover depois deste arquivo) */
+[data-testid="stBaseButton-primary"], [data-testid="stBaseButton-secondary"],
+[data-testid="stBaseButton-primaryFormSubmit"], [data-testid="stBaseButton-secondaryFormSubmit"] {
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 80ms ease;}
+[data-testid="stBaseButton-primary"]:hover, [data-testid="stBaseButton-primaryFormSubmit"]:hover {
+  background-color: #18572F !important; border-color: #18572F !important;}
+[data-testid="stBaseButton-primary"]:active, [data-testid="stBaseButton-primaryFormSubmit"]:active {
+  background-color: #134626 !important; border-color: #134626 !important; transform: translateY(1px);}
+[data-testid="stBaseButton-secondary"]:hover, [data-testid="stBaseButton-secondaryFormSubmit"]:hover {
+  border-color: var(--sv-verde) !important; color: var(--sv-verde) !important;}
+[data-testid="stBaseButton-secondary"]:active, [data-testid="stBaseButton-secondaryFormSubmit"]:active {
+  background-color: #F1EEE6 !important; transform: translateY(1px);}
+[data-testid="stPageLink"] a:hover span {text-decoration: underline;}
+
+/* foco pelo teclado sempre visível */
+button:focus-visible, a:focus-visible, [role="tab"]:focus-visible {
+  outline: 3px solid var(--sv-verde) !important; outline-offset: 2px; box-shadow: none !important;}
+
+/* indicador "ao vivo" das cotações: o ponto pulsa, o número não se mexe */
+.sv-aovivo {display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--sv-texto-3);}
+.sv-aovivo::before {content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sv-verde);
+                    animation: sv-pulso 2s ease-in-out infinite;}
+.sv-aovivo b {color: var(--sv-verde); font-weight: 600;}
+
 /* celular: depois das regras base, para valer sobre elas */
 @media (max-width: 640px) {
   /* números do dia empilhados e compactos */
@@ -68,6 +106,8 @@ h1 {font-size: 1.9rem !important; letter-spacing: -0.01em;}
   .sv-heroi {padding: 16px 14px 14px;}
 }
 
+/* reduzir movimento: tudo aparece de uma vez; o ponto "ao vivo" fica parado e aceso */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {animation: none !important; transition: none !important; scroll-behavior: auto !important;}
+  [data-testid^="stBaseButton"]:active {transform: none !important;}
 }

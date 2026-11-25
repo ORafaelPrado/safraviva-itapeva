@@ -194,3 +194,8 @@ def heroi(sobre: str, nivel: str, rotulo: str, titulo: str, apoio: str,
               <div class="sv-numeros">{blocos}</div>
             </section>"""
     )
+
+
+def ao_vivo(texto: str) -> None:
+    """Indicador de dado que se atualiza sozinho: um ponto que pulsa devagar (o número nunca se mexe)."""
+    st.markdown(f'<span class="sv-aovivo"><b>Ao vivo</b> · {html.escape(texto)}</span>', unsafe_allow_html=True)

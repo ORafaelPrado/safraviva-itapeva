@@ -54,7 +54,7 @@ def painel_ao_vivo() -> None:
     if "dolar_ptax" in resumo.index:
         r = resumo.loc["dolar_ptax"]
         d2.metric(f"Dólar PTAX ({pd.Timestamp(r['data']):%d/%m})", ui.reais(r["valor"], 4), _var(r["variacao_pct"]))
-    st.caption(f"Atualiza sozinho a cada 5 minutos enquanto a tela estiver aberta · {pd.Timestamp.now():%d/%m %Hh%M}")
+    ui.ao_vivo(f"atualiza sozinho a cada 5 minutos · última às {pd.Timestamp.now():%Hh%M}")
 
 
 painel_ao_vivo()
