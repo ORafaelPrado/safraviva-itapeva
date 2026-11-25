@@ -119,3 +119,8 @@ Assim, a rotina pode rodar várias vezes por dia sem encher a tela (nem o WhatsA
 - **Teste A/B de texto** (A veredito · B pergunta · C conversa), sorteado por sessão ou forçado por `?v=`. Com um usuário só não há volume estatístico: serve para conversa; vale como métrica se houver mais produtores.
 - **Medição sem ferramenta externa:** `uso.evento` no próprio banco (página, versão, clique), sem dado pessoal; gravado no fim da execução para não atrasar a tela e sem nunca quebrar o painel. Desligado nos testes (`SAFRAVIVA_SEM_EVENTOS`).
 - Os gráficos mantêm a paleta validada para daltonismo: a cor da marca não entra em gráfico.
+
+## D028 — "Hoje" no banco também no horário de Brasília (25/11/2026)
+- O teste do GitHub (servidor em UTC) falhou às 23h18 de Brasília: a lavoura aparecia com **um dia a mais** de plantada, porque o `current_date` do DuckDB já estava no dia seguinte (UTC). O painel online (Streamlit Cloud, também em UTC) tinha o mesmo erro entre 21h e meia-noite.
+- Correção em dois níveis: a view `fazenda.vw_estadio_atual` calcula o dia com `current_timestamp AT TIME ZONE 'America/Sao_Paulo'`, e `core.db.conectar()` faz `SET TimeZone = 'America/Sao_Paulo'` em toda conexão (vale para as outras consultas com `current_date`). Complementa o ajuste de fuso do Python (`core/config.py`).
+- Teste de regressão roda a view com a sessão em três fusos (Brasília, UTC e UTC+14).

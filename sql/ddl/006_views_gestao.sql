@@ -106,7 +106,8 @@ LEFT JOIN referencia ref ON ref.cultura = p.cultura;
 -- Fase atual de cada lavoura plantada (dias após o plantio × duração típica das fases).
 CREATE OR REPLACE VIEW fazenda.vw_estadio_atual AS
 WITH ativos AS (
-    SELECT *, date_diff('day', data_plantio, current_date) AS dias_apos_plantio
+    -- "hoje" no horário de Brasília, mesmo em servidor UTC (GitHub Actions, Streamlit Cloud): D028
+    SELECT *, date_diff('day', data_plantio, (current_timestamp AT TIME ZONE 'America/Sao_Paulo')::DATE) AS dias_apos_plantio
     FROM fazenda.vw_plantio
     WHERE status = 'plantado' AND data_plantio IS NOT NULL
 )

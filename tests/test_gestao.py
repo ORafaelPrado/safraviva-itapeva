@@ -82,7 +82,10 @@ def test_preco_de_referencia_quando_nao_ha_venda(con, fazenda):
     assert r[0] == pytest.approx(80.0) and r[1].startswith("referência")
 
 
-def test_fase_atual_da_lavoura(con, fazenda):
+@pytest.mark.parametrize("fuso_da_sessao", ["America/Sao_Paulo", "UTC", "Pacific/Kiritimati"])
+def test_fase_atual_da_lavoura(con, fazenda, fuso_da_sessao):
+    """Os dias após o plantio contam no horário de Brasília, qualquer que seja o fuso do servidor (D028)."""
+    con.execute(f"SET TimeZone = '{fuso_da_sessao}'")
     _, t1, _ = fazenda
     gestao.criar_plantio(con, t1, "soja", "verao", date.today() - timedelta(days=60))
     fase, dias = con.execute("SELECT fase, dias_apos_plantio FROM fazenda.vw_estadio_atual").fetchone()

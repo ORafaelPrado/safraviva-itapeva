@@ -28,9 +28,13 @@ def _banco_nuvem() -> str:
 def conectar(leitura: bool = False) -> duckdb.DuckDBPyConnection:
     """Abre o banco. `leitura=True` no arquivo local abre somente-leitura (não trava o ETL)."""
     if os.getenv("MOTHERDUCK_TOKEN"):
-        return duckdb.connect(f"md:{_banco_nuvem()}")  # o token é lido da variável de ambiente
-    config.CAMINHO_DB.parent.mkdir(parents=True, exist_ok=True)
-    return duckdb.connect(str(config.CAMINHO_DB), read_only=leitura)
+        con = duckdb.connect(f"md:{_banco_nuvem()}")  # o token é lido da variável de ambiente
+    else:
+        config.CAMINHO_DB.parent.mkdir(parents=True, exist_ok=True)
+        con = duckdb.connect(str(config.CAMINHO_DB), read_only=leitura)
+    # current_date/current_timestamp no horário de Brasília também em servidores UTC (D028)
+    con.execute(f"SET TimeZone = '{config.FUSO}'")
+    return con
 
 
 def substituir(

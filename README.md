@@ -67,7 +67,7 @@ flowchart LR
 | Modelo | Balanço hídrico FAO-56 + FAO-33, cenários por anos análogos, backtest contra o IBGE |
 | IA | OpenAI (Chat Completions + function calling), provedor isolado atrás de uma interface |
 | Painel | Streamlit + Plotly, paleta validada para daltonismo, tema claro para o campo |
-| Qualidade | 95 testes (pytest + AppTest do Streamlit), avaliação do agente com 12 perguntas reais, CI no GitHub Actions |
+| Qualidade | 97 testes (pytest + AppTest do Streamlit), avaliação do agente com 12 perguntas reais, CI no GitHub Actions |
 
 ## Qualidade e validação
 - **Testes:** `pytest` cobre os parsers do ETL, as transformações SQL, as regras de alerta, a gestão (rateio, ponto de equilíbrio), o balanço hídrico, a central de alertas, o agente (com um modelo simulado) e as telas (preenchendo e enviando formulários com o AppTest).
