@@ -89,3 +89,11 @@ A estimativa de safra é calculada sob demanda (`analytics/balanco_hidrico.py`) 
 | `uso.evento` | um evento | `ts`, `sessao` (id aleatório por sessão), `evento` (`pagina_vista` · `ab_view` · `cta_click`), `pagina`, `detalhe` (ex.: `agronomo\|v=B`), `dispositivo` (`celular` · `computador`). Sem dado pessoal. |
 
 Eventos de ação (passo 6): `pergunta_ia` (detalhe `sugestao` ou `digitada`; página `agronomo` ou `cotacoes`) e `lancamento_salvo` (detalhe = tipo, ex.: `colheita`, ou `ditado_ia` quando confirmado no Agrônomo). Relatório: `python -m scripts.relatorio_uso`.
+
+## Ficha da fazenda (`fazenda.ficha`)
+| Coluna | Descrição |
+|---|---|
+| `id`, `enviada_em` | identificação e hora do envio |
+| `respostas` | JSON com tudo o que o produtor preencheu (fazenda, talhões, histórico sc/ha, venda, custo, WhatsApp, observações) |
+| `propriedade_id` | propriedade criada a partir da ficha (NULL se só guardada) |
+| `situacao` | `aplicada` (fazenda criada) ou `guardada` (para conferência) |

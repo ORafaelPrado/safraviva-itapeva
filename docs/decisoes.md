@@ -124,3 +124,9 @@ Assim, a rotina pode rodar várias vezes por dia sem encher a tela (nem o WhatsA
 - O teste do GitHub (servidor em UTC) falhou às 23h18 de Brasília: a lavoura aparecia com **um dia a mais** de plantada, porque o `current_date` do DuckDB já estava no dia seguinte (UTC). O painel online (Streamlit Cloud, também em UTC) tinha o mesmo erro entre 21h e meia-noite.
 - Correção em dois níveis: a view `fazenda.vw_estadio_atual` calcula o dia com `current_timestamp AT TIME ZONE 'America/Sao_Paulo'`, e `core.db.conectar()` faz `SET TimeZone = 'America/Sao_Paulo'` em toda conexão (vale para as outras consultas com `current_date`). Complementa o ajuste de fuso do Python (`core/config.py`).
 - Teste de regressão roda a view com a sessão em três fusos (Brasília, UTC e UTC+14).
+
+## D029 — Ficha da fazenda: o formulário do produtor dentro do próprio app (25/11/2026)
+- Tela **Minha fazenda → Ficha da fazenda** (`/ficha`), protegida pela mesma senha. Uma vez preenchida, cria a propriedade **real** (não demonstração), os talhões e as lavouras da safra de verão, e o app passa a abrir nela.
+- Perguntas na língua do produtor, convertidas em `app/ficha.py`: tipo de terra → solo do ZARC (arenosa AD2, mista AD3, argilosa AD4, argilosa profunda AD5, "não sei" fica sem solo e usa AD4), precoce/médio/tardio → Grupo I/II/III, alqueire paulista → hectare (×2,42).
+- As respostas são guardadas inteiras em `fazenda.ficha` (JSON), mesmo quando não dá para criar a fazenda (ex.: nome repetido), para nada se perder. Ficam só no banco privado; nada vai para o repositório.
+- Histórico de produtividade, onde vende, custo por hectare e WhatsApp ficam na ficha para conferência; não viram dados automaticamente.

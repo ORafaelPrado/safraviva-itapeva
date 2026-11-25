@@ -14,6 +14,7 @@ O SafraViva junta **52 anos de produção agrícola (IBGE)**, **45 anos de clima
 - 🌾 **Estimativa de safra:** balanço hídrico FAO dia a dia + anos análogos desde 1991 → faixa provável de produtividade, **validada contra o IBGE**.
 - 🤖 **Agrônomo Digital:** chat com IA que consulta os dados (14 ferramentas), cita a fonte, respeita os limites (receituário agronômico, não é conselho de investimento) e **lança no caderno de campo o que o produtor dita**, com confirmação.
 - 📊 **Cotações ao vivo:** soja, milho, trigo e dólar. CEPEA (físico, histórico desde 1997), bolsa de Chicago convertida para R$/saca (~15 min de atraso) e dólar comercial/PTAX; sazonalidade, prêmio de porto e preço × custo por saca da fazenda. A tela se atualiza sozinha a cada 5 min e tem pergunta à IA ("subiu por Chicago ou pelo dólar?").
+- 📝 **Ficha da fazenda:** o produtor preenche uma vez no celular (talhões, tipo de terra, o que plantou) e o app passa a usar os dados reais.
 - 💰 **Gestão:** caderno de campo, custos, colheita e vendas; custo por saca, **ponto de equilíbrio** e margem por talhão; comparação com a CONAB e com a média de Itapeva.
 - 📈 **Região:** Itapeva × SP × PR, safras boas e ruins com o clima de cada uma, geada por mês, aquecimento do verão.
 
@@ -67,7 +68,7 @@ flowchart LR
 | Modelo | Balanço hídrico FAO-56 + FAO-33, cenários por anos análogos, backtest contra o IBGE |
 | IA | OpenAI (Chat Completions + function calling), provedor isolado atrás de uma interface |
 | Painel | Streamlit + Plotly, paleta validada para daltonismo, tema claro para o campo |
-| Qualidade | 99 testes (pytest + AppTest do Streamlit), avaliação do agente com 12 perguntas reais, CI no GitHub Actions |
+| Qualidade | 105 testes (pytest + AppTest do Streamlit), avaliação do agente com 12 perguntas reais, CI no GitHub Actions |
 
 ## Qualidade e validação
 - **Testes:** `pytest` cobre os parsers do ETL, as transformações SQL, as regras de alerta, a gestão (rateio, ponto de equilíbrio), o balanço hídrico, a central de alertas, o agente (com um modelo simulado) e as telas (preenchendo e enviando formulários com o AppTest).
@@ -118,12 +119,11 @@ analytics/   modelo clima × produtividade, balanço hídrico, estilo dos gráfi
 ai/          Agrônomo Digital: ferramentas, laço de tool calling, prompt, resumo semanal
 app/         painel: main.py, paginas/, alertas.py e notificacoes.py (regras testáveis), gestao.py
 scripts/     orquestração: ETL, rotina diária, demo, avaliações, publicação
-docs/        insights, fontes, decisões (D001–D027), dicionário de dados, conhecimento regional, design (7 passos)
+docs/        insights, fontes, decisões (D001–D029), dicionário de dados, conhecimento regional, design (7 passos)
 ```
 
 ## Próximos passos
 - **Alertas no WhatsApp** (o envio já fica separado por canal).
-- **Formulário do produtor:** ficha simples no celular para trocar a fazenda de demonstração pelos dados reais.
 
 ## Documentação
 [Insights](docs/insights.md) · [Fontes](docs/fontes.md) · [Decisões técnicas](docs/decisoes.md) · [Dicionário de dados](docs/dicionario_dados.md) · [Conhecimento regional](docs/conhecimento_regional.md) · [Publicação](docs/publicacao.md) · [Roteiro original](PROMPT_MESTRE.md)

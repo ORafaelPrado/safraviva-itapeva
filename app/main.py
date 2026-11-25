@@ -50,6 +50,7 @@ navegacao = st.navigation(
             st.Page(PAGINAS / "cotacoes.py", title="Cotações", icon=":material/trending_up:"),
         ],
         "Minha fazenda": [
+            st.Page(PAGINAS / "ficha.py", title="Ficha da fazenda", icon=":material/assignment:"),
             st.Page(PAGINAS / "estimativa.py", title="Estimativa de safra", icon=":material/grass:"),
             st.Page(PAGINAS / "fazenda.py", title="Resultados da safra", icon=":material/payments:"),
             st.Page(PAGINAS / "lancar.py", title="Lançar", icon=":material/edit_note:"),
@@ -70,6 +71,8 @@ with st.sidebar:
     props = dados.propriedades()
     if not props.empty:
         rotulos = {int(r.id): r.nome for r in props.itertuples()}
+        if "_trocar_propriedade" in st.session_state:  # ficha recém-enviada: abre na fazenda real
+            st.session_state["propriedade_id"] = st.session_state.pop("_trocar_propriedade")
         if st.session_state.get("propriedade_id") not in rotulos:  # propriedade apagada (ex.: demonstração removida)
             st.session_state.pop("propriedade_id", None)
         st.selectbox("Propriedade", list(rotulos), format_func=rotulos.get, key="propriedade_id")

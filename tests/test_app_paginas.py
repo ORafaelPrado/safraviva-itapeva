@@ -67,7 +67,7 @@ def test_resultados_renderiza_com_plantio_aberto(banco_temporario):
 
 @pytest.mark.skipif(not config.CAMINHO_DB.exists(), reason="banco real ainda não carregado")
 @pytest.mark.parametrize("pagina", ["inicio.py", "clima.py", "plantio.py", "producao.py", "safras.py",
-                                    "fazenda.py", "lancar.py", "caderno.py", "alertas.py", "estimativa.py", "cotacoes.py", "agronomo.py"])
+                                    "fazenda.py", "lancar.py", "caderno.py", "ficha.py", "alertas.py", "estimativa.py", "cotacoes.py", "agronomo.py"])
 def test_paginas_rodam_sem_erro_no_banco_real(pagina):
     with duckdb.connect(str(config.CAMINHO_DB), read_only=True) as con:
         props = con.execute("SELECT id FROM fazenda.propriedade ORDER BY demo, id LIMIT 1").fetchall()
@@ -111,3 +111,21 @@ def test_eventos_gravam_no_banco(banco_temporario):
         n = eventos.gravar(con, [(datetime(2026, 11, 24, 7), "abc", "cta_click", "inicio", "agronomo|v=A", "celular")])
         assert n == 1
         assert con.execute("SELECT evento, detalhe FROM uso.evento").fetchall() == [("cta_click", "agronomo|v=A")]
+
+
+def test_ficha_da_fazenda_preenchida_e_enviada(banco_temporario):
+    """O produtor preenche a ficha no celular e a fazenda real aparece no banco."""
+    caminho, pid, _ = banco_temporario
+    at = _app("ficha.py", pid).run()
+    assert not at.exception
+    campo = {t.label: t for t in at.text_input}
+    campo["Nome da fazenda ou do sítio"].set_value("Sítio do Pai")
+    next(t for t in at.text_input if t.key == "t0_nome").set_value("Chapada")
+    next(n for n in at.number_input if n.key == "t0_area").set_value(12.0)
+    next(b for b in at.button if b.label == "Enviar ficha").click()
+    at.run()
+    assert not at.exception
+    assert at.session_state["_ficha_ok"]["situacao"] == "aplicada"
+    with duckdb.connect(str(caminho), read_only=True) as con:
+        assert con.execute("SELECT count(*) FROM fazenda.propriedade WHERE nome = 'Sítio do Pai' AND NOT demo").fetchone()[0] == 1
+        assert con.execute("SELECT area_ha FROM fazenda.talhao WHERE nome = 'Chapada'").fetchone()[0] == 12.0
