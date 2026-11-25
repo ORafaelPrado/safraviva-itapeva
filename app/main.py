@@ -16,6 +16,30 @@ if str(RAIZ) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
+
+def _recarregar_codigo_novo() -> None:
+    """Esquece os módulos do projeto quando algum arquivo .py mudou (D030).
+
+    O Streamlit relê este arquivo e as páginas a cada execução, mas guarda os módulos importados
+    (app.ui, app.dados, ai.*...). No Streamlit Cloud, depois de um `git push`, a página nova chamava
+    uma função que o `app.ui` antigo, ainda na memória, não tinha (AttributeError: ui.titulo).
+    """
+    pacotes = ("app", "ai", "analytics", "core", "etl")
+    assinatura = tuple(sorted(
+        (str(p), p.stat().st_mtime_ns) for pasta in pacotes for p in (RAIZ / pasta).glob("*.py")))
+    anterior = sys.modules.get("_safraviva_assinatura")
+    sys.modules["_safraviva_assinatura"] = assinatura  # type: ignore[assignment]
+    if anterior is None or anterior == assinatura:  # 1ª execução do processo: tudo já é novo
+        return
+    for nome in [n for n in sys.modules if n.split(".")[0] in pacotes and "." in n]:
+        pai, _, filho = nome.rpartition(".")
+        sys.modules.pop(nome, None)
+        if pai in sys.modules and hasattr(sys.modules[pai], filho):
+            delattr(sys.modules[pai], filho)  # senão `from app import ui` devolveria o módulo antigo
+
+
+_recarregar_codigo_novo()
+
 from app import dados, eventos, ui  # noqa: E402
 
 st.set_page_config(page_title="SafraViva Itapeva", page_icon=str(ui.ICONE), layout="centered")

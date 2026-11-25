@@ -130,3 +130,8 @@ Assim, a rotina pode rodar várias vezes por dia sem encher a tela (nem o WhatsA
 - Perguntas na língua do produtor, convertidas em `app/ficha.py`: tipo de terra → solo do ZARC (arenosa AD2, mista AD3, argilosa AD4, argilosa profunda AD5, "não sei" fica sem solo e usa AD4), precoce/médio/tardio → Grupo I/II/III, alqueire paulista → hectare (×2,42).
 - As respostas são guardadas inteiras em `fazenda.ficha` (JSON), mesmo quando não dá para criar a fazenda (ex.: nome repetido), para nada se perder. Ficam só no banco privado; nada vai para o repositório.
 - Histórico de produtividade, onde vende, custo por hectare e WhatsApp ficam na ficha para conferência; não viram dados automaticamente.
+
+## D030 — Código novo no Streamlit Cloud sem reiniciar o app (25/11/2026)
+- Depois do envio da ficha, a tela `/ficha` online deu `AttributeError` em `ui.titulo`: o Streamlit relê o `main.py` e as páginas a cada execução, mas mantém na memória os módulos importados (`app.ui` antigo, sem a função nova).
+- `main.py` agora compara a data de modificação de todos os `.py` de `app/`, `ai/`, `analytics/`, `core/` e `etl/`. Se algum mudou desde a última execução do processo, ele esquece esses módulos (inclusive o atributo no pacote, senão `from app import ui` devolve o antigo). Na primeira execução não faz nada.
+- Conferido no navegador: alterar `ui.py` com o servidor ligado passou a valer na hora; antes, só reiniciando.
