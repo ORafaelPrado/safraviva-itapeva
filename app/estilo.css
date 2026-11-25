@@ -29,6 +29,7 @@ h1 {font-size: 1.9rem !important; letter-spacing: -0.01em;}
 .sv-card .sv-rotulo {font-size: 0.75rem; color: var(--sv-texto-2); text-transform: uppercase; letter-spacing: .04em;}
 .sv-card .sv-titulo {font-size: 1.02rem; font-weight: 650; color: var(--sv-texto); margin: 2px 0 4px;}
 .sv-card .sv-detalhe {font-size: 0.9rem; color: #3a3f37; line-height: 1.4;}
+.sv-subtitulo {font-size: 1.02rem; color: var(--sv-texto-2); line-height: 1.45; margin: -0.4rem 0 1rem;}
 .sv-fonte {font-size: 0.78rem; color: var(--sv-texto-3);}
 
 /* primeira dobra: veredito do dia */

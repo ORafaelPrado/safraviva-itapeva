@@ -6,15 +6,14 @@ import streamlit as st
 from app import dados, notificacoes, ui
 from app.alertas import Alerta
 
-st.title("Alertas")
+ui.titulo("Alertas", "O que pode afetar a lavoura nos próximos dias. Cada alerta some sozinho quando a situação passa.")
 pid = ui.propriedade_atual()
 
 ativos = dados.alertas_ativos(pid)
-st.caption("Gerados automaticamente a partir da previsão do tempo, da fase de cada lavoura, do zoneamento (ZARC) "
-           "e da estimativa de safra. Um alerta some sozinho quando a situação passa.")
+st.caption("Vêm da previsão do tempo, da fase de cada lavoura, do zoneamento (ZARC) e da estimativa de safra.")
 
 if ativos.empty:
-    st.success("Nenhum alerta ativo. Tempo e lavouras sem risco relevante no momento.", icon="✅")
+    st.success("Nenhum alerta agora: tempo e lavouras sem risco relevante.", icon=":material/check_circle:")
 else:
     novos = ativos[ativos["novo"]]
     c1, c2 = st.columns([3, 2])

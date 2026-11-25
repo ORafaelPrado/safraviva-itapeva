@@ -8,17 +8,18 @@ import streamlit as st
 from analytics.balanco_hidrico import CONFIABILIDADE, TAW_POR_AD
 from app import dados, ui
 
-st.title("Estimativa de safra")
+ui.titulo("Estimativa de safra", "Quanto cada lavoura deve render com a chuva que caiu até agora.")
 pid = ui.propriedade_atual()
 if pid is None:
-    st.info("Cadastre a propriedade e os plantios para ver a estimativa.")
+    st.info("Nenhuma fazenda cadastrada ainda. Comece em **Lançar → Cadastro**.")
     st.stop()
 ui.aviso_demo(bool(dados.propriedades().set_index("id").loc[pid, "demo"]))
 
 with st.spinner("Simulando a água no solo de cada lavoura..."):
     lista, tabela = dados.estimativas(pid)
 if not lista:
-    st.info("Nenhuma lavoura plantada com data de plantio e meta de produtividade.")
+    st.info("A estimativa aparece quando houver uma lavoura **plantada**, com data de plantio e meta de produtividade "
+            "(em **Lançar → Cadastro**).")
     st.stop()
 
 st.caption("Para cada lavoura, o SafraViva acompanha a água no solo dia a dia desde o plantio: chuva que entrou "

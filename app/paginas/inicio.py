@@ -159,3 +159,10 @@ if col2.button("Atualizar previsão", icon=":material/refresh:", width="stretch"
     st.rerun()
 ui.fonte("Open-Meteo (previsão), CEPEA/ESALQ (preço), MAPA/ZARC 2026/27 (plantio). "
          "Os alertas são orientação, não substituem o agrônomo.")
+
+# CTA final (docs/design/passo-4-texto.md, seção 7)
+with st.container(border=True):
+    st.markdown("**Ficou alguma dúvida sobre a lavoura?**  \nO Agrônomo Digital responde com os dados de hoje.")
+    if st.button("Perguntar ao agrônomo", type="primary", icon=":material/forum:", width="stretch", key="cta_final"):
+        eventos.registrar("cta_click", "inicio", f"final|v={versao}")
+        st.switch_page("paginas/agronomo.py")

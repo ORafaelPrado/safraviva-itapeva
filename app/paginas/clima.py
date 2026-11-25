@@ -6,10 +6,10 @@ import streamlit as st
 
 from app import alertas, dados, ui
 
-st.title("Previsão do tempo")
+ui.titulo("Previsão do tempo", "Chuva, temperatura e vento dos próximos 16 dias, e as melhores horas para pulverizar.")
 diaria, horaria = dados.previsao_diaria(), dados.previsao_horaria()
 if diaria.empty:
-    st.warning("Sem previsão no banco. Atualize na tela inicial.")
+    st.warning("Ainda não há previsão. Abra **Hoje na lavoura** e toque em **Atualizar previsão**.")
     st.stop()
 
 rotulo_dia = diaria["data"].map(alertas.dia_curto)

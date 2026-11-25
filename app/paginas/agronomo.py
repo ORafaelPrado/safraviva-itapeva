@@ -9,13 +9,12 @@ from ai.ferramentas import Contexto
 from ai.registro import registrar
 from app import dados, ui
 
-st.title("Agrônomo Digital")
-st.caption("Pergunte sobre tempo, plantio, suas lavouras, custos e a região. As respostas usam os dados do SafraViva "
-           "e citam a fonte. É orientação: decisões de defensivo exigem receituário agronômico.")
+ui.titulo("Agrônomo Digital", "Pergunte como perguntaria ao agrônomo. Ele consulta os dados do SafraViva e diz de onde tirou cada número.")
+st.caption("É orientação: defensivo só com receituário agronômico.")
 
 if not os.getenv("OPENAI_API_KEY"):
-    st.warning("Falta a chave da OpenAI. Abra o arquivo **.env** na pasta do projeto e cole a chave em "
-               "`OPENAI_API_KEY=` (sem aspas). Depois, reinicie o painel.", icon="🔑")
+    st.warning("O Agrônomo Digital está desligado neste computador: falta a chave da IA "
+               "(`OPENAI_API_KEY` no arquivo `.env`). Depois de colar a chave, reinicie o painel.", icon=":material/key:")
     st.stop()
 
 pid = ui.propriedade_atual()
@@ -53,12 +52,12 @@ NOMES_FERRAMENTA = {
 def mostrar_ferramentas(usadas: list[dict]) -> None:
     if usadas:
         nomes = list(dict.fromkeys(NOMES_FERRAMENTA.get(f["nome"], f["nome"]) for f in usadas))
-        st.caption("🔎 Consultou: " + ", ".join(nomes))
+        st.caption("Consultou: " + ", ".join(nomes))
 
 
-with st.expander("📋 Resumo da semana"):
-    st.caption("Tempo da semana, fase de cada lavoura e tarefas sugeridas. Na Fase 6 ele chega sozinho no celular.")
-    if st.button("Gerar resumo agora"):
+with st.expander("Resumo da semana", icon=":material/calendar_today:"):
+    st.caption("O tempo da semana, a fase de cada lavoura e o que fazer.")
+    if st.button("Montar o resumo da semana"):
         from ai.resumo_semanal import gerar
 
         with st.spinner("Montando o resumo..."):
@@ -67,7 +66,8 @@ with st.expander("📋 Resumo da semana"):
                 st.session_state["resumo"] = resumo.texto
                 dados.gravar(registrar, "resumo semanal", resumo, pid, "resumo_semanal")
             except Exception as erro:  # noqa: BLE001
-                st.error(f"Não consegui gerar o resumo: {erro}")
+                st.error("Não deu para montar o resumo agora. Tente de novo em 1 minuto.")
+                st.caption(f"Detalhe técnico: {erro}")
     if st.session_state.get("resumo"):
         st.markdown(st.session_state["resumo"])
 
@@ -113,7 +113,8 @@ if pergunta:
                 historico = [{"role": m["role"], "content": m["content"]} for m in st.session_state["chat"][:-1]][-10:]
                 resultado = Agente(ProvedorOpenAI()).perguntar(pergunta, ctx, historico, nome_prop)
             except Exception as erro:  # noqa: BLE001 — erro de rede/chave/modelo vira mensagem clara
-                st.error(f"Não consegui falar com a OpenAI: {erro}")
+                st.error("O agrônomo não conseguiu responder agora. Tente de novo em 1 minuto.")
+                st.caption(f"Detalhe técnico: {erro}")
                 st.session_state["chat"].pop()
                 st.stop()
         st.markdown(resultado.texto)
@@ -125,6 +126,6 @@ if pergunta:
     st.rerun()
 
 if st.session_state["chat"]:
-    if st.button("🧹 Nova conversa"):
+    if st.button("Nova conversa", icon=":material/refresh:"):
         st.session_state["chat"], st.session_state["pendentes"] = [], []
         st.rerun()

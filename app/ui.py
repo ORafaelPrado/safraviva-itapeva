@@ -36,6 +36,12 @@ def configurar_pagina() -> None:
     st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
 
 
+def titulo(texto: str, subtitulo: str) -> None:
+    """Título da página (a pergunta que ela responde) + uma linha do que tem ali (docs/design/passo-4-texto.md)."""
+    st.title(texto)
+    st.markdown(f'<p class="sv-subtitulo">{html.escape(subtitulo)}</p>', unsafe_allow_html=True)
+
+
 def cartao(alerta: Alerta, tema: str | None = None) -> None:
     """Cartão de alerta: barra lateral colorida + ícone + rótulo escrito (nunca só a cor)."""
     tema = tema or alerta.tema.capitalize()
@@ -113,7 +119,7 @@ def propriedade_atual() -> int | None:
 def aviso_demo(demo: bool) -> None:
     if demo:
         st.warning("**Fazenda de demonstração:** os números são fictícios (custos com base na CONAB e produtividade "
-                   "coerente com o clima real). Eles vão ser trocados pelos dados reais da fazenda.", icon="🧪")
+                   "coerente com o clima real). Eles vão ser trocados pelos dados reais da fazenda.", icon=":material/science:")
 
 
 def liberar_acesso() -> bool:

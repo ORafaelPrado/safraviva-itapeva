@@ -4,16 +4,16 @@ import streamlit as st
 
 from app import dados, gestao, ui
 
-st.title("Caderno de campo")
+ui.titulo("Caderno de campo", "Tudo o que foi lançado, por talhão e por data.")
 pid = ui.propriedade_atual()
 if pid is None:
-    st.info("Ainda não há propriedade cadastrada.")
+    st.info("Nenhuma fazenda cadastrada ainda. Comece em **Lançar → Cadastro**.")
     st.stop()
 ui.aviso_demo(bool(dados.propriedades().set_index("id").loc[pid, "demo"]))
 
 c = dados.caderno(pid)
 if c.empty:
-    st.info("Nada lançado ainda. Use a tela **Lançar**.")
+    st.info("Nada lançado ainda. Anote a primeira operação em **Lançar**.")
     st.stop()
 
 c1, c2 = st.columns(2)

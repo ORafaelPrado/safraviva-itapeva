@@ -9,11 +9,11 @@ import streamlit as st
 
 from app import dados, gestao, ui
 
-st.title("Lançar")
+ui.titulo("Lançar", "Anote o que foi feito: operação, despesa, colheita, venda ou problema na lavoura.")
 pid = ui.propriedade_atual()
 
 if pid is None:
-    st.info("Cadastre a propriedade para começar.")
+    st.info("Nenhuma fazenda cadastrada ainda. Dê um nome para a propriedade e comece.")
     with st.form("nova_propriedade"):
         nome = st.text_input("Nome da propriedade")
         if st.form_submit_button("Criar propriedade", type="primary") and nome.strip():

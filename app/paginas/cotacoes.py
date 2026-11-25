@@ -8,7 +8,7 @@ import streamlit as st
 
 from app import dados, ui
 
-st.title("Cotações")
+ui.titulo("Cotações", "Quanto está a saca hoje e se o preço mexeu por causa de Chicago ou do dólar.")
 st.caption("**CEPEA/ESALQ:** preço do físico no Brasil, uma vez por dia (sai à tarde). **Chicago (CBOT):** bolsa ao vivo, "
            "com ~15 min de atraso, convertida para R$/saca. A conversão não inclui o prêmio de porto, o frete nem os impostos. "
            "**Dólar:** comercial ao vivo e PTAX do Banco Central.")
@@ -30,7 +30,7 @@ def _var(v) -> str | None:
 def painel_ao_vivo() -> None:
     falha = dados.cotacoes_atualizar_se_preciso()
     if falha:
-        st.toast(f"Não deu para atualizar as cotações: {falha}", icon="⚠️")
+        st.toast(f"Não deu para atualizar as cotações: {falha}", icon=":material/warning:")
     resumo = dados.cotacao_resumo().set_index("serie")
     bolsa = dados.cotacao_bolsa().set_index("serie")
     if resumo.empty:
@@ -129,9 +129,9 @@ ui.fonte("CEPEA/ESALQ (CC BY-NC 4.0, uso não comercial com crédito); CBOT e d�
 
 # --- Pergunte à IA --------------------------------------------------------------------------------------------
 st.divider()
-st.subheader("🤖 Pergunte sobre as cotações")
+st.subheader("Pergunte sobre as cotações")
 if not os.getenv("OPENAI_API_KEY"):
-    st.info("Para perguntar à IA, configure OPENAI_API_KEY (veja a tela Agrônomo Digital).")
+    st.info("A pergunta à IA está desligada neste computador: falta a chave da IA (veja a tela Agrônomo Digital).")
 else:
     from ai.agente import Agente, ProvedorOpenAI
     from ai.ferramentas import Contexto
@@ -162,5 +162,6 @@ else:
                 dados.gravar(registrar, pergunta, resultado, pid, "cotacoes")
             except Exception as erro:  # noqa: BLE001
                 st.session_state["chat_cotacoes"].pop()
-                st.error(f"Não consegui falar com a OpenAI: {erro}")
+                st.error("O agrônomo não conseguiu responder agora. Tente de novo em 1 minuto.")
+                st.caption(f"Detalhe técnico: {erro}")
         st.rerun()

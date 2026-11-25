@@ -5,13 +5,13 @@ import streamlit as st
 
 from app import dados, gestao, ui
 
-st.title("Resultados da safra")
+ui.titulo("Resultados da safra", "Quanto custou cada saca, quanto sobra e quanto precisa colher para empatar.")
 pid = ui.propriedade_atual()
 
 if pid is None:
-    st.info("Ainda não há propriedade cadastrada. Os dados reais da fazenda vão entrar pelo formulário do produtor; "
-            "até lá, dá para ver a gestão funcionando com a fazenda de demonstração.")
-    if st.button("🧪 Carregar fazenda de demonstração", type="primary"):
+    st.info("Nenhuma fazenda cadastrada ainda. Os dados reais vão entrar pelo formulário do produtor; "
+            "até lá, dá para ver a gestão funcionando com uma fazenda de exemplo.")
+    if st.button("Ver com uma fazenda de exemplo", type="primary", icon=":material/science:"):
         from scripts.carregar_demo import carregar
 
         ok, msg = dados.gravar(carregar)
@@ -147,6 +147,6 @@ if not v.empty:
 
 if demo:
     st.divider()
-    if st.button("🗑️ Remover a fazenda de demonstração"):
+    if st.button("Apagar a fazenda de exemplo", icon=":material/delete:"):
         ok, msg = dados.gravar(gestao.remover_demonstracao)
         st.rerun() if ok else st.error(msg)

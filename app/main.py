@@ -31,7 +31,7 @@ PAGINAS = RAIZ / "app" / "paginas"
 # Previsão com mais de 6 h: atualiza previsão + alertas antes de desenhar (uma vez por sessão).
 _falha = dados.atualizar_se_preciso()
 if _falha:
-    st.toast(f"Não deu para atualizar a previsão agora: {_falha}", icon="⚠️")
+    st.toast(f"Não deu para atualizar a previsão agora: {_falha}", icon=":material/warning:")
 _alertas = dados.alertas_ativos(st.session_state.get("propriedade_id"))
 NOVOS = int(_alertas["novo"].sum()) if not _alertas.empty else 0
 # Menu no topo (no celular vira um botão sempre visível), por pergunta do produtor (plano mestre, seção 7).

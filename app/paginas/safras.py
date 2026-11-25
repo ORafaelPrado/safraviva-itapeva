@@ -6,7 +6,7 @@ import streamlit as st
 
 from app import dados, ui
 
-st.title("Clima e safras")
+ui.titulo("Clima e safras", "Quais safras foram boas ou ruins em Itapeva, e o clima de cada uma.")
 cultura = st.segmented_control("Cultura", ["soja", "milho", "trigo"], default="soja",
                                format_func=str.capitalize, key="cultura_safras") or "soja"
 
