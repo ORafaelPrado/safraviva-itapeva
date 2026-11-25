@@ -88,6 +88,12 @@ else:
         eventos.registrar("cta_click", "inicio", f"previsao|v={versao}")
         st.switch_page("paginas/clima.py")
 
+    # Feedback de baixo custo (passo 7): o voto vai para uso.evento com a versão do texto.
+    st.caption("Esse resumo do dia ajudou?")
+    voto = st.feedback("thumbs", key="voto_veredito")
+    if voto is not None:
+        eventos.registrar_uma_vez("feedback_veredito", "inicio", f"{'ajudou' if voto == 1 else 'nao_ajudou'}|v={versao}")
+
 # ---------------------------------------------------------------- detalhe (depois da rolagem)
 alertas_novos = dados.alertas_ativos(pid)
 if not alertas_novos.empty:

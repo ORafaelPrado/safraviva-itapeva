@@ -22,6 +22,7 @@ h1 {font-size: 1.9rem !important; letter-spacing: -0.01em;}
 [data-testid="stPageLink"] a {min-height: 44px;}
 /* menu, abas e botões do cabeçalho também com >= 44 px (medido no passo 5: eram 28 e 40 px) */
 [data-testid="stSidebarNavLink"], [data-testid="stTopNavLink"], [role="tab"] {min-height: 44px;}
+[data-testid="stFeedback"] button {min-width: 44px; min-height: 44px;}
 [data-testid="stExpandSidebarButton"], [data-testid="stMainMenu"] button, [data-testid="stSidebarCollapseButton"] button {
   min-width: 44px; min-height: 44px;}
 /* texto de exemplo dos campos: 60% de opacidade dava 4,2:1; agora 6,1:1 */

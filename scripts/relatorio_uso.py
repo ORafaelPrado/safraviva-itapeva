@@ -37,6 +37,20 @@ def sessoes(con: duckdb.DuckDBPyConnection, dias: int = 30) -> pd.DataFrame:
     return con.execute(SQL_SESSOES, [dias]).df()
 
 
+def extras(con: duckdb.DuckDBPyConnection, dias: int = 30) -> dict:
+    """Votos no veredito (ajudou / não ajudou) e uso da IA no período."""
+    votos = dict(con.execute(
+        """SELECT split_part(detalhe, '|', 1), count(*) FROM uso.evento
+           WHERE evento = 'feedback_veredito' AND ts >= current_timestamp::TIMESTAMP - to_days(CAST(? AS INTEGER))
+           GROUP BY 1""", [dias]).fetchall())
+    ia = con.execute(
+        """SELECT count(*), coalesce(sum(tokens_entrada + tokens_saida), 0) FROM ai.conversa
+           WHERE origem IN ('chat', 'cotacoes') AND ts >= current_timestamp::TIMESTAMP - to_days(CAST(? AS INTEGER))""",
+        [dias]).fetchone()
+    return {"ajudou": votos.get("ajudou", 0), "nao_ajudou": votos.get("nao_ajudou", 0),
+            "perguntas_ia": int(ia[0]), "tokens_ia": int(ia[1])}
+
+
 def resumo(s: pd.DataFrame) -> dict:
     """Números do funil a partir da tabela de sessões (função pura, testada)."""
     if s.empty:
@@ -65,9 +79,12 @@ def main() -> None:
     args = ap.parse_args()
     with conectar() as con:
         r = resumo(sessoes(con, args.dias))
+        x = extras(con, args.dias)
+    print(f"IA: {x['perguntas_ia']} perguntas · {x['tokens_ia']:,} tokens".replace(",", "."))
     if not r["sessoes"]:
         print(f"Nenhum uso registrado nos últimos {args.dias} dias.")
         return
+    print(f"Veredito: ajudou {x['ajudou']} · não ajudou {x['nao_ajudou']}")
     print(f"Últimos {args.dias} dias · {r['sessoes']} sessões · {r['dias_com_uso']} dias com uso "
           f"· {r['dias_por_semana']} dias/semana (meta: 4)")
     print(f"Funil: viu o veredito {r['viu_veredito_pct']:.0f}% → clicou {r['clicou_pct']:.0f}% → agiu {r['agiu_pct']:.0f}%")

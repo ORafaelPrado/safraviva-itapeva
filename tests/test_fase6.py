@@ -127,3 +127,20 @@ def test_relatorio_de_uso_monta_o_funil():
     assert (r["viu_veredito_pct"], r["clicou_pct"], r["agiu_pct"]) == (100, 50, 50)
     assert r["por_versao"]["A"]["agiu"] == 1.0 and r["por_versao"]["B"]["clicou"] == 0.0
     assert relatorio_uso.resumo(relatorio_uso.sessoes(duckdb.connect(), 30)) == {"sessoes": 0}
+
+
+def test_relatorio_conta_votos_e_uso_da_ia():
+    from datetime import datetime
+
+    import duckdb
+
+    from app import eventos
+    from core import config
+    from scripts import relatorio_uso
+
+    con = duckdb.connect()
+    con.execute((config.DIR_SQL / "ddl" / "007_ai.sql").read_text(encoding="utf-8"))
+    eventos.gravar(con, [(datetime.now(), "s1", "feedback_veredito", "inicio", "ajudou|v=A", "celular"),
+                         (datetime.now(), "s2", "feedback_veredito", "inicio", "nao_ajudou|v=B", "celular")])
+    con.execute("INSERT INTO ai.conversa (origem, pergunta, tokens_entrada, tokens_saida) VALUES ('chat', 'x', 900, 100)")
+    assert relatorio_uso.extras(con, 7) == {"ajudou": 1, "nao_ajudou": 1, "perguntas_ia": 1, "tokens_ia": 1000}
