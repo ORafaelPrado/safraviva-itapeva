@@ -100,5 +100,8 @@ with st.sidebar:
 navegacao.run()
 
 # Medição (uso.evento): grava depois que a tela já foi desenhada.
+# Idioma da página para leitores de tela e tradução automática (o Streamlit marca tudo como "en").
+st.html("<script>document.documentElement.lang = 'pt-BR'</script>", unsafe_allow_javascript=True)
+
 eventos.registrar("pagina_vista", navegacao.url_path or "inicio")
 eventos.enviar()

@@ -194,7 +194,7 @@ def heroi(sobre: str, nivel: str, rotulo: str, titulo: str, apoio: str,
         f"""<section class="sv-heroi" aria-label="Resumo do dia">
               <div class="sv-sobre">{html.escape(sobre)}</div>
               <span class="sv-selo" style="--sv-selo-cor:{cor};--sv-selo-fundo:{fundo}">{html.escape(rotulo)}</span>
-              <h2 class="sv-titulo-heroi">{html.escape(titulo)}</h2>
+              <h1 class="sv-titulo-heroi">{html.escape(titulo)}</h1>
               {linha_resposta}
               <p class="sv-apoio">{html.escape(apoio)}</p>
               <div class="sv-numeros">{blocos}</div>
